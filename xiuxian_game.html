@@ -31,7 +31,7 @@ button{cursor:pointer;border:none;outline:none;background:none;-webkit-appearanc
 .start-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .start-bg::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 30% 20%,rgba(78,205,196,.08) 0%,transparent 50%),radial-gradient(ellipse at 70% 80%,rgba(212,168,83,.06) 0%,transparent 50%),radial-gradient(ellipse at 50% 50%,rgba(155,89,182,.04) 0%,transparent 60%);animation:bgDrift 20s ease-in-out infinite alternate}
 @keyframes bgDrift{0%{transform:translate(0,0) rotate(0deg)}100%{transform:translate(-3%,2%) rotate(3deg)}}
-.start-stars{position:absolute;inset:0}
+.start-stars{position:absolute;inset:0;pointer-events:none}
 .star{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;animation:twinkle var(--d,3s) ease-in-out infinite var(--delay,0s)}
 @keyframes twinkle{0%,100%{opacity:.2;transform:scale(1)}50%{opacity:1;transform:scale(1.5)}}
 .start-content{position:relative;z-index:2;text-align:center;padding:0 30px}
@@ -42,7 +42,7 @@ button{cursor:pointer;border:none;outline:none;background:none;-webkit-appearanc
 .start-btn{display:block;width:220px;margin:12px auto;padding:14px 0;border-radius:30px;font-size:16px;font-weight:700;letter-spacing:4px;position:relative;overflow:hidden;transition:all .3s}
 .start-btn:active{transform:scale(.95)}
 .start-btn.primary{background:linear-gradient(135deg,var(--gold3),var(--gold));color:#0a0a0f;box-shadow:0 4px 20px rgba(212,168,83,.3)}
-.start-btn.primary::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(45deg,transparent 40%,rgba(255,255,255,.15) 50%,transparent 60%);animation:shimmer 3s infinite}
+.start-btn.primary::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(45deg,transparent 40%,rgba(255,255,255,.15) 50%,transparent 60%);animation:shimmer 3s infinite;pointer-events:none}
 @keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 .start-btn.secondary{background:rgba(255,255,255,.05);color:var(--gold2);border:1px solid rgba(212,168,83,.3)}
 .start-version{position:absolute;bottom:calc(var(--safe-bottom) + 20px);font-size:11px;color:rgba(232,224,208,.2);letter-spacing:2px}
@@ -128,7 +128,7 @@ button{cursor:pointer;border:none;outline:none;background:none;-webkit-appearanc
 .building-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .bld{background:linear-gradient(145deg,rgba(25,25,50,.9),rgba(15,15,35,.9));border:1px solid var(--border);border-radius:14px;padding:14px 6px;text-align:center;position:relative;overflow:hidden;transition:all .2s;-webkit-tap-highlight-color:transparent}
 .bld:active{transform:scale(.94);border-color:rgba(212,168,83,.4)}
-.bld::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,.03),transparent 70%)}
+.bld::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,.03),transparent 70%);pointer-events:none}
 .bld .bi{font-size:28px;display:block;margin-bottom:6px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
 .bld .bn{font-size:12px;font-weight:600;color:var(--white);letter-spacing:1px}
 .bld .bd{font-size:9px;color:rgba(232,224,208,.35);margin-top:3px}
@@ -140,7 +140,7 @@ button{cursor:pointer;border:none;outline:none;background:none;-webkit-appearanc
 /* ========== 修炼页 ========== */
 .cult-page{padding:12px;display:flex;flex-direction:column;gap:10px}
 .hero-card{background:linear-gradient(145deg,var(--bg3),var(--bg2));border:1px solid var(--border);border-radius:16px;padding:20px;text-align:center;position:relative;overflow:hidden}
-.hero-card::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent,rgba(212,168,83,.03),transparent,rgba(78,205,196,.03),transparent);animation:heroRotate 15s linear infinite}
+.hero-card::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent,rgba(212,168,83,.03),transparent,rgba(78,205,196,.03),transparent);animation:heroRotate 15s linear infinite;pointer-events:none}
 @keyframes heroRotate{to{transform:rotate(360deg)}}
 .hero-portrait{width:100px;height:130px;margin:0 auto;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:56px;position:relative;z-index:1;border:2px solid var(--border);overflow:hidden}
 .hero-portrait::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(0,0,0,.4));border-radius:12px}
@@ -363,7 +363,7 @@ button{cursor:pointer;border:none;outline:none;background:none;-webkit-appearanc
     <button class="start-btn primary" onclick="showCharSelect()">开始游戏</button>
     <button class="start-btn secondary" onclick="continueGame()">继续修仙</button>
   </div>
-  <div class="start-version">v1.0 · 单机修仙</div>
+  <div class="start-version">sweet测试1.0 · 单机修仙</div>
 </div>
 
 <!-- ===== 角色选择 ===== -->
@@ -1146,7 +1146,7 @@ function startChapter(chId){
 function showScene(){
   if(!curStory)return;const s=curStory.scenes[curScene];if(!s)return;
   $('sBg').style.background=curStory.bg||'linear-gradient(180deg,#1a0a2a,#0a1a3a)';
-  $('sSpeaker').textContent=s.sp?'【'+s.sp+'']:'';
+  $('sSpeaker').textContent=s.sp?'\u3010'+s.sp+'\u3011':'';
   $('sText').textContent=s.tx;
   const ch=$('sChoices');ch.innerHTML='';
   if(s.ch)s.ch.forEach(c=>{const b=document.createElement('button');b.className='story-ch';b.textContent=c.t;
