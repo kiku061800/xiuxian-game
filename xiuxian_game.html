@@ -345,6 +345,34 @@ button{cursor:pointer;border:none;outline:none;background:none;-webkit-appearanc
 
 /* ========== 响应式 ========== */
 @media(min-width:414px){.building-grid{grid-template-columns:repeat(4,1fr)}.bag-grid{grid-template-columns:repeat(5,1fr)}}
+
+/* ========== SVG人物立绘 ========== */
+.svg-portrait{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.svg-portrait svg{width:100%;height:100%}
+
+/* ========== 新手引导 ========== */
+.guide-mask{position:fixed;inset:0;z-index:600;display:none;align-items:center;justify-content:center}
+.guide-mask.show{display:flex}
+.guide-bg{position:absolute;inset:0;background:rgba(0,0,0,.75)}
+.guide-spotlight{position:absolute;border-radius:16px;box-shadow:0 0 0 9999px rgba(0,0,0,.75);z-index:1;transition:all .4s ease}
+.guide-tip{position:absolute;z-index:2;background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--gold3);border-radius:16px;padding:16px 18px;max-width:280px;text-align:center;animation:guideBounce .5s ease}
+@keyframes guideBounce{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+.guide-tip .gt-text{font-size:13px;color:var(--white);line-height:1.8}
+.guide-tip .gt-arrow{width:12px;height:12px;background:var(--bg3);border:1px solid var(--gold3);transform:rotate(45deg);position:absolute;top:-7px;left:50%;margin-left:-6px;border-right:none;border-bottom:none}
+.guide-tip .gt-btn{margin-top:10px;padding:8px 24px;border-radius:20px;font-size:13px;font-weight:600;background:linear-gradient(135deg,var(--gold3),var(--gold));color:#0a0a0f;letter-spacing:1px}
+.guide-tip .gt-btn:active{transform:scale(.95)}
+.guide-tip .gt-skip{margin-top:6px;font-size:11px;color:rgba(232,224,208,.3)}
+
+/* ========== 修为满提示 ========== */
+.xw-full-tip{position:fixed;top:calc(var(--safe-top) + 50px);left:50%;transform:translateX(-50%);z-index:550;background:linear-gradient(135deg,rgba(50,40,10,.95),rgba(30,25,5,.95));border:1px solid var(--gold3);border-radius:16px;padding:12px 20px;display:none;align-items:center;gap:10px;animation:xwPulse 1.5s ease-in-out infinite;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.xw-full-tip.show{display:flex}
+@keyframes xwPulse{0%,100%{box-shadow:0 0 10px rgba(212,168,83,.2)}50%{box-shadow:0 0 25px rgba(212,168,83,.5)}}
+.xw-full-tip .xft-icon{font-size:28px}
+.xw-full-tip .xft-info{flex:1}
+.xw-full-tip .xft-title{font-size:13px;font-weight:700;color:var(--gold2)}
+.xw-full-tip .xft-desc{font-size:10px;color:rgba(232,224,208,.4);margin-top:2px}
+.xw-full-tip .xft-btn{padding:6px 14px;border-radius:16px;font-size:12px;font-weight:600;background:var(--gold);color:#0a0a0f}
+.xw-full-tip .xft-btn:active{transform:scale(.95)}
 </style>
 </head>
 <body>
@@ -467,6 +495,20 @@ button{cursor:pointer;border:none;outline:none;background:none;-webkit-appearanc
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
+<!-- 修为满提示 -->
+<div class="xw-full-tip" id="xwFullTip">
+  <span class="xft-icon">⚡</span>
+  <div class="xft-info"><div class="xft-title">修为已满，可以突破！</div><div class="xft-desc" id="xftDesc">前往修炼页尝试突破</div></div>
+  <button class="xft-btn" onclick="goBreakthrough()">突破</button>
+</div>
+
+<!-- 新手引导 -->
+<div class="guide-mask" id="guideMask">
+  <div class="guide-bg" onclick="endGuide()"></div>
+  <div class="guide-spotlight" id="guideSpot"></div>
+  <div class="guide-tip" id="guideTip"><div class="gt-arrow"></div><div class="gt-text" id="guideText"></div><button class="gt-btn" id="guideBtn" onclick="nextGuide()">下一步</button><div class="gt-skip" onclick="endGuide()">跳过引导</div></div>
+</div>
+
 <script>
 // ==================== 数据 ====================
 const REALMS=[
@@ -491,17 +533,55 @@ const HEROES=[
   {id:'dark',name:'暗灵根',avatar:'🧝‍♀️',desc:'幽冥之力，吞噬万物',tags:['暗系','全属性+5%'],bonus:{allMul:0.05}},
 ];
 
+// ==================== SVG人物立绘 ====================
+function makeCharSVG(ri,heroId){
+  const colors={
+    ice:{hair:'#7ec8e3',robe:'#2a6496',robe2:'#1a4a70',accent:'#a8e6f0',skin:'#f5e6d3',eye:'#4ecdc4'},
+    fire:{hair:'#e84393',robe:'#c0392b',robe2:'#96281b',accent:'#ff6b6b',skin:'#f5e6d3',eye:'#e74c3c'},
+    sword:{hair:'#dfe6e9',robe:'#636e72',robe2:'#4a5356',accent:'#b2bec3',skin:'#f5e6d3',eye:'#74b9ff'},
+    nature:{hair:'#00b894',robe:'#27ae60',robe2:'#1e8449',accent:'#55efc4',skin:'#f5e6d3',eye:'#00cec9'},
+    thunder:{hair:'#fdcb6e',robe:'#6c5ce7',robe2:'#5a4bd1',accent:'#a29bfe',skin:'#f5e6d3',eye:'#fdcb6e'},
+    dark:{hair:'#636e72',robe:'#2d3436',robe2:'#1e272e',accent:'#b2bec3',skin:'#f5e6d3',eye:'#dfe6e9'}
+  };
+  const c=colors[heroId]||colors.ice;
+  // 境界影响装饰
+  const glow=ri>=7?'<circle cx="50" cy="30" r="45" fill="none" stroke="'+REALMS[ri].color+'" stroke-width="0.5" opacity="0.3"><animate attributeName="r" values="40;50;40" dur="3s" repeatCount="indefinite"/></circle>':'';
+  const crown=ri>=8?'<polygon points="50,8 44,18 56,18" fill="#ffd700" opacity="0.8"/><polygon points="42,12 38,20 46,20" fill="#ffd700" opacity="0.6"/><polygon points="58,12 54,20 62,20" fill="#ffd700" opacity="0.6"/>':'';
+  const aura=ri>=5?`<ellipse cx="50" cy="55" rx="30" ry="40" fill="${REALMS[ri].color}" opacity="0.06"/>`:'';
+  const hairStyle=ri<3?'<path d="M30,28 Q35,12 50,10 Q65,12 70,28 L68,35 Q60,25 50,23 Q40,25 32,35 Z" fill="'+c.hair+'"/>':'<path d="M28,30 Q32,8 50,6 Q68,8 72,30 L70,40 Q62,22 50,20 Q38,22 30,40 Z" fill="'+c.hair+'" opacity="0.9"/><path d="M25,32 Q20,45 22,55" stroke="'+c.hair+'" stroke-width="3" fill="none" opacity="0.7"/><path d="M75,32 Q80,45 78,55" stroke="'+c.hair+'" stroke-width="3" fill="none" opacity="0.7"/>';
+  const ribbon=ri>=4?`<path d="M35,42 Q50,38 65,42" stroke="${REALMS[ri].color}" stroke-width="1.5" fill="none" opacity="0.6"/><circle cx="50" cy="40" r="2" fill="${REALMS[ri].color}" opacity="0.8"/>`:'';
+  const eyes=ri>=6?`<ellipse cx="43" cy="35" rx="2.5" ry="1.5" fill="${c.eye}"/><ellipse cx="57" cy="35" rx="2.5" ry="1.5" fill="${c.eye}"/><line x1="38" y1="34" x2="48" y2="34" stroke="${c.eye}" stroke-width="0.5" opacity="0.5"/><line x1="52" y1="34" x2="62" y2="34" stroke="${c.eye}" stroke-width="0.5" opacity="0.5"/>`:`<ellipse cx="43" cy="35" rx="2" ry="1.5" fill="${c.eye}"/><ellipse cx="57" cy="35" rx="2" ry="1.5" fill="${c.eye}"/>`;
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${aura}${glow}
+    ${hairStyle}
+    <ellipse cx="50" cy="42" rx="16" ry="20" fill="${c.skin}"/>
+    <ellipse cx="50" cy="44" rx="14" ry="18" fill="${c.skin}" opacity="0.9"/>
+    ${eyes}
+    <path d="M46,39 Q50,41 54,39" stroke="#c0392b" stroke-width="0.5" fill="none" opacity="0.4"/>
+    <path d="M44,44 Q50,47 56,44" stroke="#e17055" stroke-width="0.6" fill="none" opacity="0.5"/>
+    <path d="M34,55 Q50,52 66,55 L64,85 Q50,88 36,85 Z" fill="${c.robe}"/>
+    <path d="M34,55 Q50,52 66,55 L65,60 Q50,57 35,60 Z" fill="${c.robe2}"/>
+    <path d="M38,60 L42,85 L50,82 L58,85 L62,60" fill="${c.accent}" opacity="0.15"/>
+    <line x1="50" y1="55" x2="50" y2="82" stroke="${c.accent}" stroke-width="0.5" opacity="0.3"/>
+    <path d="M30,55 L34,58 L34,75 L30,78 Z" fill="${c.robe2}"/>
+    <path d="M70,55 L66,58 L66,75 L70,78 Z" fill="${c.robe2}"/>
+    ${ribbon}${crown}
+    ${ri>=2?'<circle cx="50" cy="65" r="3" fill="'+c.accent+'" opacity="0.4"/>':''}
+    ${ri>=4?'<circle cx="50" cy="65" r="4" fill="'+REALMS[ri].color+'" opacity="0.3"><animate attributeName="opacity" values="0.2;0.5;0.2" dur="2s" repeatCount="indefinite"/></circle>':''}
+    ${ri>=6?'<circle cx="50" cy="65" r="6" fill="'+REALMS[ri].color+'" opacity="0.15"><animate attributeName="r" values="5;8;5" dur="2.5s" repeatCount="indefinite"/></circle>':''}
+  </svg>`;
+}
+
 const PORTRAITS=[
-  {icon:'🧝‍♀️',bg:'linear-gradient(180deg,#1a3a4a,#0a2a3a)'},
-  {icon:'🧝‍♀️',bg:'linear-gradient(180deg,#1a2a4a,#0a1a3a)'},
-  {icon:'🧞‍♀️',bg:'linear-gradient(180deg,#2a1a4a,#1a0a3a)'},
-  {icon:'👸',bg:'linear-gradient(180deg,#3a1a3a,#2a0a2a)'},
-  {icon:'👸',bg:'linear-gradient(180deg,#3a2a1a,#2a1a0a)'},
-  {icon:'👸',bg:'linear-gradient(180deg,#2a2a3a,#1a1a2a)'},
-  {icon:'👑',bg:'linear-gradient(180deg,#3a3a1a,#2a2a0a)'},
-  {icon:'👑',bg:'linear-gradient(180deg,#4a3a1a,#3a2a0a)'},
-  {icon:'⚡',bg:'linear-gradient(180deg,#4a1a1a,#3a0a0a)'},
-  {icon:'👸',bg:'linear-gradient(180deg,#4a3a0a,#3a2a00)'}
+  {bg:'linear-gradient(180deg,#1a3a4a,#0a2a3a)'},
+  {bg:'linear-gradient(180deg,#1a2a4a,#0a1a3a)'},
+  {bg:'linear-gradient(180deg,#2a1a4a,#1a0a3a)'},
+  {bg:'linear-gradient(180deg,#3a1a3a,#2a0a2a)'},
+  {bg:'linear-gradient(180deg,#3a2a1a,#2a1a0a)'},
+  {bg:'linear-gradient(180deg,#2a2a3a,#1a1a2a)'},
+  {bg:'linear-gradient(180deg,#3a3a1a,#2a2a0a)'},
+  {bg:'linear-gradient(180deg,#4a3a1a,#3a2a0a)'},
+  {bg:'linear-gradient(180deg,#4a1a1a,#3a0a0a)'},
+  {bg:'linear-gradient(180deg,#4a3a0a,#3a2a00)'}
 ];
 
 const MONSTERS=[
@@ -686,7 +766,7 @@ function renderCharGrid(){
   HEROES.forEach(h=>{
     const d=document.createElement('div');
     d.className='cs-char'+(selectedChar===h.id?' selected':'');
-    d.innerHTML=`<div class="char-avatar" style="background:linear-gradient(135deg,var(--bg4),var(--bg3))">${h.avatar}</div>
+    d.innerHTML=`<div class="char-avatar" style="background:linear-gradient(135deg,var(--bg4),var(--bg3))"><div class="svg-portrait">${makeCharSVG(0,h.id)}</div></div>
       <div class="char-name">${h.name}</div>
       <div class="char-desc">${h.desc}</div>
       <div class="char-tags">${h.tags.map(t=>`<span class="char-tag">${t}</span>`).join('')}</div>`;
@@ -728,6 +808,8 @@ function initGame(){
   initNav();initBuildings();initTownPt();
   updateAll();renderPage('Cult');renderPage('Cave');renderPage('Realm');renderPage('Bag');
   setInterval(saveGame,30000);
+  // 新手引导
+  if(!G.guided){setTimeout(startGuide,600)}
 }
 
 function initNav(){
@@ -959,7 +1041,7 @@ function startBattle(mid){
   const ui=$('battleUI');ui.classList.add('show');
   ui.innerHTML=`<div class="battle-top"><span class="battle-title">⚔️ ${m.name}</span><button class="battle-skip" onclick="skipBattle()">跳过</button></div>
   <div class="battle-stage">
-    <div class="b-entity player"><span class="be-icon">${PORTRAITS[G.ri].icon}</span><div class="be-name">${G.name}</div><div class="be-hp"><div class="be-hpf" id="bPhp" style="width:100%"></div></div><div class="be-hpt" id="bPHp">${G.hp}/${G.mhp}</div></div>
+    <div class="b-entity player"><span class="be-icon"><div class="svg-portrait" style="width:56px;height:56px">${makeCharSVG(G.ri,G.heroId)}</div></span><div class="be-name">${G.name}</div><div class="be-hp"><div class="be-hpf" id="bPhp" style="width:100%"></div></div><div class="be-hpt" id="bPHp">${G.hp}/${G.mhp}</div></div>
     <div class="b-vs">⚡ VS ⚡</div>
     <div class="b-entity enemy"><span class="be-icon">${m.icon}</span><div class="be-name">${m.name}</div><div class="be-hp"><div class="be-hpf" id="bEhp" style="width:100%"></div></div><div class="be-hpt" id="bEHp">${m.hp}/${m.hp}</div></div>
   </div>
@@ -1193,7 +1275,7 @@ function renderCult(){
 
   $('pgCult').innerHTML=`<div class="cult-page">
     <div class="hero-card">
-      <div class="hero-portrait" style="background:${p.bg}"><span style="position:relative;z-index:1">${p.icon}</span></div>
+      <div class="hero-portrait" style="background:${p.bg}"><div class="svg-portrait">${makeCharSVG(G.ri,G.heroId)}</div></div>
       <div class="hero-name">${G.name}</div>
       <div class="hero-realm">${realm.name}期 · ${realm.st[G.si]}</div>
       <div class="hero-stats">
@@ -1292,7 +1374,7 @@ function showPlayerInfo(){
   openModal(`<div class="modal-head"><h3>👤 角色信息</h3><button class="modal-x" onclick="closeModal()">✕</button></div>
   <div class="modal-body">
     <div style="text-align:center;margin-bottom:14px">
-      <div style="font-size:48px">${PORTRAITS[G.ri].icon}</div>
+      <div style="font-size:48px">${makeCharSVG(G.ri,G.heroId)}</div>
       <div style="font-size:18px;font-weight:800;color:var(--gold2);margin-top:8px;letter-spacing:2px">${G.name}</div>
       <div style="font-size:13px;color:${realm.color};margin-top:4px">${realm.name}期 · ${realm.st[G.si]}</div>
     </div>
@@ -1335,12 +1417,13 @@ function updateAll(){
   $('pName').textContent=G.name;
   $('avatarBadge').textContent=realm.name.substring(0,2);
   $('pRealm').textContent=`${realm.name}期 · ${realm.st[G.si]}`;
-  $('avatarC').textContent=PORTRAITS[G.ri].icon;
+  $('avatarC').innerHTML=makeCharSVG(G.ri,G.heroId);
   $('rLs').textContent=fmt(G.ls);$('rXy').textContent=fmt(G.xy);
   $('rXw').textContent=`${fmt(G.xw)}/${fmt(need)}`;
   $('xwBar').style.width=pct+'%';
   $('xwLabel').textContent=`修为 ${fmt(G.xw)}/${fmt(need)}`;
   initBuildings();
+  checkXwFull();
 }
 
 // ==================== 存档 ====================
@@ -1355,10 +1438,62 @@ function loadGame(){
     G.techs=s.techs||['t1'];G.curRealm=s.curRealm||0;G.afCount=s.afCount||0;
     G.sp=s.sp||{};G.tasks=s.tasks||{cult:0,fight:0,alc:0};
     G.lastOn=s.lastOn||Date.now();G.kills=s.kills||0;G.btBonus=s.btBonus||0;G.cs=s.cs||1;
-    G.name=s.name||'凌霜';G.heroId=s.heroId||'ice';
+    G.name=s.name||'凌霜';G.heroId=s.heroId||'ice';G.guided=s.guided||false;
     recalcStats();calcOffline();
   }catch(e){console.error('Load error:',e)}
 }
+
+// ==================== 新手引导 ====================
+const GUIDE_STEPS=[
+  {text:'欢迎来到修仙世界！\n这里是你的修为进度条，修炼可以积累修为',target:'xwBar',pos:'bottom'},
+  {text:'点击「修炼」可以查看角色详情\n打坐修炼是提升修为的主要方式',target:null,action:()=>switchPage('Cult'),pos:'center'},
+  {text:'修为满了就可以尝试突破\n突破成功会晋升到下一个境界！',target:null,action:()=>switchPage('Cult'),pos:'center'},
+  {text:'「秘境」可以挑战妖兽\n获取修为、灵石和装备',target:null,action:()=>switchPage('Realm'),pos:'center'},
+  {text:'「行囊」管理你的物品\n丹药、装备、材料都在这里',target:null,action:()=>switchPage('Bag'),pos:'center'},
+  {text:'新手引导完成！\n祝你在仙途上一帆风顺 🎉',target:null,pos:'center'},
+];
+let guideIdx=0;
+
+function startGuide(){
+  guideIdx=0;showGuideStep();
+}
+function showGuideStep(){
+  if(guideIdx>=GUIDE_STEPS.length){endGuide();return}
+  const step=GUIDE_STEPS[guideIdx];
+  const mask=$('guideMask');const spot=$('guideSpot');const tip=$('guideTip');const txt=$('guideText');const btn=$('guideBtn');
+  if(step.action)step.action();
+  setTimeout(()=>{
+    if(step.target){
+      const el=$(step.target);if(!el){nextGuide();return}
+      const r=el.getBoundingClientRect();
+      spot.style.cssText=`display:block;left:${r.left-6}px;top:${r.top-6}px;width:${r.width+12}px;height:${r.height+12}px`;
+    }else{spot.style.display='none'}
+    txt.textContent=step.text;
+    btn.textContent=guideIdx===GUIDE_STEPS.length-1?'开始修仙':'下一步';
+    // 定位提示框
+    if(step.target){
+      const r=$(step.target).getBoundingClientRect();
+      tip.style.cssText=`left:${r.left+r.width/2-140}px;top:${r.bottom+16}px`;
+    }else{
+      tip.style.cssText=`left:50%;top:50%;transform:translate(-50%,-50%)`;
+    }
+    mask.classList.add('show');
+  },step.action?400:50);
+}
+function nextGuide(){guideIdx++;showGuideStep()}
+function endGuide(){$('guideMask').classList.remove('show');G.guided=true;saveGame()}
+
+// ==================== 修为满检测 ====================
+function checkXwFull(){
+  const realm=REALMS[G.ri];const need=realm.xw[G.si];
+  if(G.xw>=need){
+    $('xwFullTip').classList.add('show');
+    $('xftDesc').textContent=`${realm.name}${realm.st[G.si]} → ${G.si<realm.st.length-1?realm.name+realm.st[G.si+1]:(G.ri<REALMS.length-1?REALMS[G.ri+1].name+REALMS[G.ri+1].st[0]:'飞升')}`;
+  }else{
+    $('xwFullTip').classList.remove('show');
+  }
+}
+function goBreakthrough(){$('xwFullTip').classList.remove('show');switchPage('Cult');setTimeout(()=>tryBreakthrough(),300)}
 
 // ==================== 启动 ====================
 document.addEventListener('DOMContentLoaded',()=>{initStartScreen()});
