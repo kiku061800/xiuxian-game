@@ -28,7 +28,7 @@ button{cursor:pointer;border:none;outline:none;background:none;-webkit-appearanc
 /* ========== 开始界面 ========== */
 #startScreen{position:fixed;inset:0;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#08080f;transition:opacity .8s,transform .8s}
 #startScreen.hide{opacity:0;transform:scale(1.1);pointer-events:none}
-.start-bg{position:absolute;inset:0;overflow:hidden}
+.start-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .start-bg::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 30% 20%,rgba(78,205,196,.08) 0%,transparent 50%),radial-gradient(ellipse at 70% 80%,rgba(212,168,83,.06) 0%,transparent 50%),radial-gradient(ellipse at 50% 50%,rgba(155,89,182,.04) 0%,transparent 60%);animation:bgDrift 20s ease-in-out infinite alternate}
 @keyframes bgDrift{0%{transform:translate(0,0) rotate(0deg)}100%{transform:translate(-3%,2%) rotate(3deg)}}
 .start-stars{position:absolute;inset:0}
@@ -117,7 +117,7 @@ button{cursor:pointer;border:none;outline:none;background:none;-webkit-appearanc
 
 /* ========== 城镇页 ========== */
 .town-scene{min-height:100%;position:relative}
-.town-bg{position:absolute;inset:0;background:linear-gradient(180deg,#08080f 0%,#0a0f1a 20%,#0f1a2e 50%,#0a1628 80%,#08080f 100%);overflow:hidden}
+.town-bg{position:absolute;inset:0;background:linear-gradient(180deg,#08080f 0%,#0a0f1a 20%,#0f1a2e 50%,#0a1628 80%,#08080f 100%);overflow:hidden;pointer-events:none}
 .town-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 20%,rgba(78,205,196,.04),transparent 60%)}
 .town-particles{position:absolute;inset:0;pointer-events:none}
 .tp{position:absolute;width:2px;height:2px;background:var(--gold);border-radius:50%;opacity:0;animation:tpFloat var(--d,6s) linear infinite var(--delay,0s)}
