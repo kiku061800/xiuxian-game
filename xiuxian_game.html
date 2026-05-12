@@ -1,0 +1,2129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>仙路漫漫 · 一念逍遥</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+:root{
+  --bg:#0a0a12;--bg2:#12121f;--bg3:#1a1a2e;--bg4:#222240;
+  --gold:#d4a853;--gold2:#f0d080;--gold3:#b8922e;
+  --cyan:#4ecdc4;--cyan2:#2ea8a0;
+  --red:#e74c3c;--red2:#ff6b6b;
+  --green:#2ecc71;--green2:#27ae60;
+  --purple:#9b59b6;--purple2:#8e44ad;
+  --blue:#3498db;--blue2:#2980b9;
+  --white:#eee8d5;--white2:#c8c0b0;--white3:#8a8070;
+  --border:#2a2a45;--border2:#3a3a55;
+  --shadow:0 2px 12px rgba(0,0,0,.5);
+  --radius:8px;--radius2:12px;
+  --safe-top:env(safe-area-inset-top,20px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--white);font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;font-size:14px;line-height:1.5}
+#app{width:100%;height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden}
+
+/* 顶部状态栏 */
+.top-bar{padding:var(--safe-top) 12px 8px;background:linear-gradient(180deg,rgba(10,10,18,.98),rgba(10,10,18,.85));backdrop-filter:blur(10px);z-index:100;flex-shrink:0}
+.top-info{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.avatar{width:40px;height:40px;border-radius:50%;border:2px solid var(--gold);overflow:hidden;flex-shrink:0;position:relative;background:var(--bg3)}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.avatar .realm-badge{position:absolute;bottom:-2px;right:-2px;background:var(--gold);color:#000;font-size:9px;padding:1px 4px;border-radius:8px;white-space:nowrap;font-weight:700}
+.player-info{flex:1;min-width:0}
+.player-name{font-size:15px;font-weight:700;color:var(--gold2);display:flex;align-items:center;gap:4px}
+.player-name .title{font-size:10px;background:var(--purple);padding:1px 6px;border-radius:4px;color:#fff}
+.realm-text{font-size:11px;color:var(--cyan);margin-top:1px}
+.top-resources{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.res-item{display:flex;align-items:center;gap:3px;font-size:12px;background:rgba(255,255,255,.05);padding:3px 8px;border-radius:12px}
+.res-icon{font-size:14px}
+.res-val{color:var(--gold2);font-weight:600}
+
+/* 修炼进度条 */
+.cultivation-bar{margin-top:6px;background:var(--bg3);border-radius:10px;height:18px;position:relative;overflow:hidden;border:1px solid var(--border)}
+.cultivation-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--cyan2),var(--cyan),var(--gold));transition:width .5s;position:relative}
+.cultivation-fill::after{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.2),transparent);border-radius:10px 10px 0 0}
+.cultivation-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:10px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.8);white-space:nowrap}
+
+/* 主内容区 */
+.main-content{flex:1;overflow:hidden;position:relative}
+.page{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;display:none;flex-direction:column}
+.page.active{display:flex}
+.page::-webkit-scrollbar{display:none}
+
+/* 底部导航 */
+.bottom-nav{display:flex;background:linear-gradient(0deg,rgba(10,10,18,.98),rgba(10,10,18,.9));backdrop-filter:blur(10px);padding:4px 0 calc(4px + var(--safe-bottom));border-top:1px solid var(--border);z-index:100;flex-shrink:0}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;cursor:pointer;position:relative;transition:all .2s}
+.nav-item.active .nav-icon{color:var(--gold)}
+.nav-item.active .nav-label{color:var(--gold)}
+.nav-item.active::before{content:'';position:absolute;top:0;left:25%;right:25%;height:2px;background:var(--gold);border-radius:2px}
+.nav-icon{font-size:22px;color:var(--white3);transition:color .2s}
+.nav-label{font-size:10px;color:var(--white3);transition:color .2s}
+.nav-badge{position:absolute;top:2px;right:calc(50% - 18px);background:var(--red);color:#fff;font-size:9px;padding:0 4px;border-radius:8px;min-width:14px;text-align:center}
+
+/* 城镇页面 */
+.town-scene{flex:1;position:relative;min-height:100%}
+.town-bg{position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(180deg,#0d1117 0%,#1a1a2e 30%,#16213e 60%,#0f3460 100%);overflow:hidden}
+.town-bg::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='80' cy='15' r='8' fill='%23f0d080' opacity='.3'/%3E%3Ccircle cx='20' cy='25' r='3' fill='%23fff' opacity='.4'/%3E%3Ccircle cx='50' cy='10' r='2' fill='%23fff' opacity='.3'/%3E%3Ccircle cx='70' cy='30' r='1.5' fill='%23fff' opacity='.5'/%3E%3Ccircle cx='35' cy='8' r='1' fill='%23fff' opacity='.6'/%3E%3C/svg%3E") no-repeat top;background-size:100% auto}
+.town-mountains{position:absolute;bottom:20%;left:0;right:0;height:200px}
+.town-content{position:relative;z-index:2;padding:10px;display:flex;flex-direction:column;gap:10px;min-height:100%}
+
+/* 城镇建筑入口 */
+.building-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 4px}
+.building-btn{background:linear-gradient(135deg,rgba(30,30,60,.8),rgba(20,20,40,.9));border:1px solid var(--border);border-radius:var(--radius);padding:12px 6px;text-align:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.building-btn:active{transform:scale(.95);border-color:var(--gold)}
+.building-btn .b-icon{font-size:28px;display:block;margin-bottom:4px}
+.building-btn .b-name{font-size:11px;color:var(--white);font-weight:600}
+.building-btn .b-desc{font-size:9px;color:var(--white3);margin-top:2px}
+.building-btn.locked{opacity:.4;pointer-events:none}
+.building-btn .b-badge{position:absolute;top:4px;right:4px;background:var(--red);color:#fff;font-size:8px;padding:1px 4px;border-radius:6px}
+
+/* 修炼页面 */
+.cultivate-page{padding:15px;display:flex;flex-direction:column;gap:12px;min-height:100%}
+.cultivate-hero{position:relative;text-align:center;padding:20px 0}
+.hero-portrait{width:120px;height:160px;margin:0 auto;border-radius:var(--radius2);border:2px solid var(--gold3);overflow:hidden;position:relative;background:var(--bg3)}
+.hero-portrait .portrait-img{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:60px;background:linear-gradient(180deg,var(--bg3),var(--bg4))}
+.hero-portrait .realm-glow{position:absolute;inset:-4px;border-radius:var(--radius2);opacity:.5;animation:glow 2s ease-in-out infinite alternate}
+@keyframes glow{0%{box-shadow:0 0 10px var(--cyan),0 0 20px transparent}100%{box-shadow:0 0 20px var(--gold),0 0 40px var(--cyan)}}
+.hero-info{text-align:center;margin-top:10px}
+.hero-name{font-size:18px;font-weight:700;color:var(--gold2)}
+.hero-realm{font-size:14px;color:var(--cyan);margin-top:2px}
+.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.stat-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:8px 4px;text-align:center}
+.stat-label{font-size:10px;color:var(--white3)}
+.stat-val{font-size:14px;font-weight:700;color:var(--gold2);margin-top:2px}
+
+/* 修炼操作区 */
+.cultivate-actions{display:flex;flex-direction:column;gap:8px}
+.cultivate-btn{background:linear-gradient(135deg,#1a3a4a,#0d2a3a);border:1px solid var(--cyan2);border-radius:var(--radius);padding:14px;text-align:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.cultivate-btn:active{transform:scale(.97)}
+.cultivate-btn .btn-icon{font-size:24px}
+.cultivate-btn .btn-text{font-size:14px;font-weight:700;color:var(--cyan);margin-top:4px}
+.cultivate-btn .btn-desc{font-size:10px;color:var(--white3);margin-top:2px}
+.cultivate-btn.breakthrough{background:linear-gradient(135deg,#3a2a0a,#2a1a00);border-color:var(--gold3)}
+.cultivate-btn.breakthrough .btn-text{color:var(--gold)}
+.cultivate-btn.breakthrough .btn-icon{animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.cultivate-btn.meditate{background:linear-gradient(135deg,#1a2a3a,#0a1a2a);border-color:var(--blue2)}
+.cultivate-btn.meditate .btn-text{color:var(--blue)}
+
+/* 洞府页面 */
+.cave-page{padding:15px;display:flex;flex-direction:column;gap:10px;min-height:100%}
+.cave-header{text-align:center;padding:10px 0}
+.cave-header h2{font-size:18px;color:var(--gold2)}
+.cave-header p{font-size:11px;color:var(--white3);margin-top:4px}
+.cave-qi{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;display:flex;align-items:center;justify-content:space-between}
+.cave-qi .qi-label{font-size:12px;color:var(--white2)}
+.cave-qi .qi-val{font-size:14px;color:var(--cyan);font-weight:700}
+.cave-rooms{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.cave-room{background:linear-gradient(135deg,var(--bg3),var(--bg2));border:1px solid var(--border);border-radius:var(--radius);padding:14px 10px;text-align:center;cursor:pointer;transition:all .2s}
+.cave-room:active{transform:scale(.96);border-color:var(--gold)}
+.cave-room .room-icon{font-size:30px;display:block;margin-bottom:6px}
+.cave-room .room-name{font-size:13px;font-weight:600;color:var(--white)}
+.cave-room .room-desc{font-size:10px;color:var(--white3);margin-top:3px}
+.cave-room .room-level{font-size:10px;color:var(--gold);margin-top:3px}
+
+/* 秘境页面 */
+.realm-page{padding:15px;display:flex;flex-direction:column;gap:10px;min-height:100%}
+.realm-map{position:relative;background:linear-gradient(180deg,#0a1628,#162040,#0a1628);border:1px solid var(--border);border-radius:var(--radius2);padding:15px;min-height:200px;overflow:hidden}
+.realm-map::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%,rgba(78,205,196,.1),transparent 70%)}
+.realm-title{text-align:center;font-size:16px;color:var(--gold2);font-weight:700;margin-bottom:10px;position:relative;z-index:1}
+.monster-area{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;position:relative;z-index:1}
+.monster-btn{background:rgba(20,20,40,.8);border:1px solid var(--border);border-radius:var(--radius);padding:10px 6px;text-align:center;cursor:pointer;transition:all .2s}
+.monster-btn:active{transform:scale(.95);border-color:var(--red)}
+.monster-btn .m-icon{font-size:32px;display:block}
+.monster-btn .m-name{font-size:11px;color:var(--white);margin-top:4px}
+.monster-btn .m-level{font-size:9px;color:var(--red2)}
+.monster-btn.boss{border-color:var(--gold3);background:rgba(50,40,10,.8)}
+.monster-btn.boss .m-level{color:var(--gold)}
+.auto-fight-bar{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;display:flex;align-items:center;justify-content:space-between}
+.auto-fight-bar .af-info{font-size:12px;color:var(--white2)}
+.auto-fight-bar .af-btn{background:var(--green2);color:#fff;border:none;padding:6px 16px;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer}
+.auto-fight-bar .af-btn.fighting{background:var(--red)}
+
+/* 背包页面 */
+.bag-page{padding:15px;display:flex;flex-direction:column;gap:10px;min-height:100%}
+.bag-tabs{display:flex;gap:6px;background:var(--bg2);border-radius:var(--radius);padding:4px}
+.bag-tab{flex:1;text-align:center;padding:6px;border-radius:6px;font-size:12px;color:var(--white3);cursor:pointer;transition:all .2s}
+.bag-tab.active{background:var(--bg4);color:var(--gold);font-weight:600}
+.bag-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.bag-slot{aspect-ratio:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.bag-slot:active{transform:scale(.93)}
+.bag-slot .item-icon{font-size:28px}
+.bag-slot .item-name{font-size:8px;color:var(--white2);margin-top:2px;text-align:center;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;padding:0 2px}
+.bag-slot .item-count{position:absolute;bottom:2px;right:4px;font-size:9px;color:var(--gold2);font-weight:700}
+.bag-slot .item-rarity{position:absolute;top:0;left:0;right:0;height:2px}
+.bag-slot.rarity-white .item-rarity{background:#aaa}
+.bag-slot.rarity-green .item-rarity{background:var(--green)}
+.bag-slot.rarity-blue .item-rarity{background:var(--blue)}
+.bag-slot.rarity-purple .item-rarity{background:var(--purple)}
+.bag-slot.rarity-orange .item-rarity{background:var(--gold)}
+.bag-slot.empty{opacity:.3}
+
+/* 弹窗 */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:linear-gradient(180deg,var(--bg2),var(--bg));border:1px solid var(--border2);border-radius:var(--radius2);width:100%;max-width:360px;max-height:80vh;overflow-y:auto;position:relative}
+.modal::-webkit-scrollbar{display:none}
+.modal-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg2);z-index:1}
+.modal-header h3{font-size:16px;color:var(--gold2);font-weight:700}
+.modal-close{width:28px;height:28px;border-radius:50%;background:var(--bg4);border:none;color:var(--white3);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.modal-body{padding:16px}
+.modal-footer{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+
+/* 按钮 */
+.btn{padding:8px 20px;border-radius:var(--radius);border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn:active{transform:scale(.95)}
+.btn-primary{background:linear-gradient(135deg,var(--gold3),var(--gold));color:#000}
+.btn-secondary{background:var(--bg4);color:var(--white2);border:1px solid var(--border)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-cyan{background:linear-gradient(135deg,var(--cyan2),var(--cyan));color:#000}
+.btn-sm{padding:5px 12px;font-size:11px}
+.btn-block{width:100%;padding:12px}
+
+/* 战斗界面 */
+.battle-scene{position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(180deg,#0a0a1a,#1a0a2a,#0a1a2a);z-index:300;display:none;flex-direction:column}
+.battle-scene.show{display:flex}
+.battle-header{padding:var(--safe-top) 12px 8px;display:flex;justify-content:space-between;align-items:center}
+.battle-title{font-size:14px;color:var(--gold2);font-weight:700}
+.battle-skip{background:var(--bg4);border:1px solid var(--border);color:var(--white2);padding:4px 12px;border-radius:var(--radius);font-size:11px;cursor:pointer}
+.battle-arena{flex:1;display:flex;flex-direction:column;justify-content:space-around;padding:20px;position:relative}
+.battle-entity{text-align:center}
+.battle-entity .entity-icon{font-size:60px;display:block;margin-bottom:8px;filter:drop-shadow(0 0 10px rgba(255,255,255,.2))}
+.battle-entity .entity-name{font-size:14px;font-weight:700;color:var(--white)}
+.battle-entity .entity-hp{width:80%;margin:6px auto 0;height:12px;background:var(--bg3);border-radius:6px;overflow:hidden;border:1px solid var(--border)}
+.battle-entity .entity-hp-fill{height:100%;border-radius:6px;transition:width .3s}
+.battle-entity.player .entity-hp-fill{background:linear-gradient(90deg,var(--green2),var(--green))}
+.battle-entity.enemy .entity-hp-fill{background:linear-gradient(90deg,var(--red),var(--red2))}
+.battle-entity .entity-hp-text{font-size:10px;color:var(--white3);margin-top:2px}
+.battle-vs{text-align:center;font-size:24px;font-weight:900;color:var(--gold);text-shadow:0 0 20px rgba(212,168,83,.5)}
+.battle-log{padding:8px 12px;background:rgba(0,0,0,.5);max-height:100px;overflow-y:auto;font-size:11px;color:var(--white2);line-height:1.8}
+.battle-log::-webkit-scrollbar{display:none}
+.battle-log .log-damage{color:var(--red2)}
+.battle-log .log-heal{color:var(--green)}
+.battle-log .log-info{color:var(--cyan)}
+.battle-log .log-crit{color:var(--gold2);font-weight:700}
+.battle-actions{padding:10px 15px calc(10px + var(--safe-bottom));display:flex;gap:8px}
+.battle-actions .btn{flex:1}
+
+/* 剧情界面 */
+.story-scene{position:fixed;top:0;left:0;right:0;bottom:0;z-index:250;display:none;flex-direction:column}
+.story-scene.show{display:flex}
+.story-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:opacity .5s}
+.story-overlay{position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.8) 0%,rgba(0,0,0,.3) 40%,rgba(0,0,0,.1) 100%)}
+.story-content{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;justify-content:flex-end}
+.story-speaker{padding:0 20px;font-size:13px;color:var(--gold);font-weight:700;margin-bottom:4px}
+.story-text{padding:12px 20px;background:rgba(0,0,0,.6);backdrop-filter:blur(10px);border-radius:var(--radius2) var(--radius2) 0 0;font-size:14px;line-height:1.8;color:var(--white);min-height:120px;border-top:1px solid rgba(212,168,83,.3)}
+.story-choices{padding:10px 20px calc(10px + var(--safe-bottom));display:flex;flex-direction:column;gap:8px}
+.story-choice{background:rgba(20,20,40,.8);border:1px solid var(--gold3);border-radius:var(--radius);padding:12px 16px;color:var(--white);font-size:13px;cursor:pointer;transition:all .2s;text-align:left}
+.story-choice:active{transform:scale(.97);background:rgba(40,40,80,.8)}
+.story-continue{position:absolute;bottom:20px;right:20px;font-size:12px;color:var(--white3);animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* 突破动画 */
+.breakthrough-anim{position:fixed;top:0;left:0;right:0;bottom:0;z-index:400;display:none;align-items:center;justify-content:center;flex-direction:column;background:radial-gradient(circle,rgba(78,205,196,.2),rgba(10,10,18,.95))}
+.breakthrough-anim.show{display:flex}
+.bt-circle{width:150px;height:150px;border-radius:50%;border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:50px;animation:btSpin 2s linear infinite;position:relative}
+.bt-circle::before{content:'';position:absolute;inset:-10px;border-radius:50%;border:1px solid rgba(212,168,83,.3);animation:btSpin 3s linear infinite reverse}
+@keyframes btSpin{to{transform:rotate(360deg)}}
+.bt-text{margin-top:20px;font-size:18px;color:var(--gold2);font-weight:700;animation:btPulse 1s ease-in-out infinite}
+@keyframes btPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.05)}}
+.bt-sub{font-size:12px;color:var(--white3);margin-top:8px}
+
+/* Toast提示 */
+.toast{position:fixed;top:calc(var(--safe-top) + 60px);left:50%;transform:translateX(-50%);background:rgba(20,20,40,.95);border:1px solid var(--border2);color:var(--white);padding:8px 20px;border-radius:20px;font-size:13px;z-index:500;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;backdrop-filter:blur(10px)}
+.toast.show{opacity:1}
+.toast.success{border-color:var(--green2);color:var(--green)}
+.toast.error{border-color:var(--red);color:var(--red2)}
+.toast.gold{border-color:var(--gold3);color:var(--gold2)}
+
+/* 飘字效果 */
+.float-text{position:fixed;z-index:450;font-size:16px;font-weight:700;pointer-events:none;animation:floatUp 1.5s ease-out forwards}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-60px)}}
+
+/* 炼丹界面 */
+.alchemy-page{padding:15px;display:flex;flex-direction:column;gap:10px}
+.recipe-list{display:flex;flex-direction:column;gap:8px}
+.recipe-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all .2s}
+.recipe-item:active{transform:scale(.98);border-color:var(--gold)}
+.recipe-item .r-icon{font-size:28px}
+.recipe-item .r-info{flex:1}
+.recipe-item .r-name{font-size:13px;font-weight:600;color:var(--white)}
+.recipe-item .r-desc{font-size:10px;color:var(--white3);margin-top:2px}
+.recipe-item .r-btn{background:var(--gold3);color:#000;border:none;padding:5px 12px;border-radius:var(--radius);font-size:11px;font-weight:600;cursor:pointer}
+
+/* 装备详情 */
+.equip-detail{display:flex;flex-direction:column;gap:10px}
+.equip-header{display:flex;align-items:center;gap:12px}
+.equip-icon-big{font-size:48px;width:72px;height:72px;background:var(--bg3);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;border:1px solid var(--border)}
+.equip-meta{flex:1}
+.equip-name-big{font-size:16px;font-weight:700}
+.equip-type{font-size:11px;color:var(--white3);margin-top:2px}
+.equip-stats{background:var(--bg3);border-radius:var(--radius);padding:10px 12px}
+.equip-stat-row{display:flex;justify-content:space-between;padding:3px 0;font-size:12px}
+.equip-stat-row .es-label{color:var(--white3)}
+.equip-stat-row .es-val{color:var(--green)}
+
+/* 任务/日常 */
+.daily-tasks{display:flex;flex-direction:column;gap:8px}
+.task-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;display:flex;align-items:center;gap:10px}
+.task-item .t-icon{font-size:24px}
+.task-item .t-info{flex:1}
+.task-item .t-name{font-size:12px;color:var(--white)}
+.task-item .t-progress{font-size:10px;color:var(--white3);margin-top:2px}
+.task-item .t-progress-bar{height:4px;background:var(--bg);border-radius:2px;margin-top:3px;overflow:hidden}
+.task-item .t-progress-fill{height:100%;background:var(--cyan);border-radius:2px;transition:width .3s}
+.task-item .t-reward{font-size:11px;color:var(--gold)}
+.task-item .t-btn{background:var(--green2);color:#fff;border:none;padding:4px 10px;border-radius:var(--radius);font-size:10px;cursor:pointer}
+.task-item .t-btn.done{background:var(--white3);pointer-events:none}
+
+/* 排行榜 */
+.rank-list{display:flex;flex-direction:column;gap:6px}
+.rank-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;display:flex;align-items:center;gap:10px}
+.rank-item .rank-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:var(--bg4);color:var(--white3)}
+.rank-item:nth-child(1) .rank-num{background:var(--gold);color:#000}
+.rank-item:nth-child(2) .rank-num{background:#aaa;color:#000}
+.rank-item:nth-child(3) .rank-num{background:#cd7f32;color:#000}
+.rank-item .rank-name{flex:1;font-size:13px;color:var(--white)}
+.rank-item .rank-val{font-size:12px;color:var(--gold2)}
+
+/* 分隔标题 */
+.section-title{font-size:14px;font-weight:700;color:var(--gold2);padding:8px 0 4px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--gold);border-radius:2px}
+
+/* 境界蜕变立绘区 */
+.realm-evolve{display:flex;flex-direction:column;align-items:center;gap:8px;padding:15px;background:linear-gradient(180deg,rgba(78,205,196,.05),transparent);border-radius:var(--radius2);border:1px solid rgba(78,205,196,.2)}
+.evolve-stage{display:flex;gap:4px;align-items:center}
+.evolve-dot{width:10px;height:10px;border-radius:50%;background:var(--bg4);border:1px solid var(--border)}
+.evolve-dot.active{background:var(--gold);border-color:var(--gold);box-shadow:0 0 6px var(--gold)}
+.evolve-dot.current{background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 6px var(--cyan);animation:blink 1.5s infinite}
+.evolve-line{width:20px;height:2px;background:var(--border)}
+.evolve-label{font-size:11px;color:var(--white3)}
+
+/* 粒子效果 */
+.particles{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1}
+.particle{position:absolute;width:3px;height:3px;background:var(--gold);border-radius:50%;opacity:0;animation:particleFloat 4s infinite}
+@keyframes particleFloat{0%{opacity:0;transform:translateY(0) scale(0)}20%{opacity:.8}80%{opacity:.3}100%{opacity:0;transform:translateY(-100px) scale(1)}}
+
+/* 滚动条隐藏 */
+::-webkit-scrollbar{width:0;height:0}
+
+/* 响应式 */
+@media(min-width:414px){
+  .building-grid{grid-template-columns:repeat(4,1fr)}
+  .bag-grid{grid-template-columns:repeat(5,1fr)}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- 顶部状态栏 -->
+  <div class="top-bar">
+    <div class="top-info">
+      <div class="avatar" onclick="showPlayerDetail()">
+        <div class="portrait-img" id="avatarDisplay">🧝‍♀️</div>
+        <div class="realm-badge" id="realmBadge">练气一层</div>
+      </div>
+      <div class="player-info">
+        <div class="player-name"><span id="playerName">凌霜</span><span class="title" id="playerTitle">散修</span></div>
+        <div class="realm-text" id="realmText">练气期 · 一层</div>
+      </div>
+    </div>
+    <div class="top-resources">
+      <div class="res-item"><span class="res-icon">💎</span><span class="res-val" id="resLingshi">1000</span></div>
+      <div class="res-item"><span class="res-icon">🪙</span><span class="res-val" id="resXianyuan">0</span></div>
+      <div class="res-item"><span class="res-icon">⚡</span><span class="res-val" id="resXiuwei">0/100</span></div>
+    </div>
+    <div class="cultivation-bar">
+      <div class="cultivation-fill" id="xiuweiBar" style="width:0%"></div>
+      <div class="cultivation-text" id="xiuweiText">修为 0/100</div>
+    </div>
+  </div>
+
+  <!-- 主内容区 -->
+  <div class="main-content">
+    <!-- 城镇页 -->
+    <div class="page active" id="pageTown">
+      <div class="town-scene">
+        <div class="town-bg">
+          <div class="particles" id="particles"></div>
+        </div>
+        <div class="town-content">
+          <div class="section-title">📍 清虚观</div>
+          <div class="building-grid">
+            <div class="building-btn" onclick="openModal('cultivateModal')">
+              <span class="b-icon">🧘‍♀️</span>
+              <span class="b-name">修炼场</span>
+              <span class="b-desc">打坐修炼</span>
+            </div>
+            <div class="building-btn" onclick="openModal('alchemyModal')">
+              <span class="b-icon">⚗️</span>
+              <span class="b-name">炼丹房</span>
+              <span class="b-desc">炼制丹药</span>
+            </div>
+            <div class="building-btn" onclick="openModal('forgeModal')">
+              <span class="b-icon">🔨</span>
+              <span class="b-name">炼器室</span>
+              <span class="b-desc">打造装备</span>
+            </div>
+            <div class="building-btn" onclick="openModal('shopModal')">
+              <span class="b-icon">🏪</span>
+              <span class="b-name">坊市</span>
+              <span class="b-desc">购买物品</span>
+            </div>
+            <div class="building-btn" onclick="openModal('taskModal')">
+              <span class="b-icon">📜</span>
+              <span class="b-name">任务榜</span>
+              <span class="b-desc">每日任务</span>
+              <span class="b-badge" id="taskBadge">3</span>
+            </div>
+            <div class="building-btn" onclick="openModal('rankModal')">
+              <span class="b-icon">🏆</span>
+              <span class="b-name">论剑台</span>
+              <span class="b-desc">排行榜</span>
+            </div>
+            <div class="building-btn" onclick="openModal('storyModal')">
+              <span class="b-icon">📖</span>
+              <span class="b-name">仙途录</span>
+              <span class="b-desc">主线剧情</span>
+              <span class="b-badge" style="background:var(--gold)">新</span>
+            </div>
+            <div class="building-btn" onclick="openModal('divineModal')">
+              <span class="b-icon">🔮</span>
+              <span class="b-name">天机阁</span>
+              <span class="b-desc">机缘兑换</span>
+            </div>
+            <div class="building-btn" onclick="openModal('skillModal')">
+              <span class="b-icon">✨</span>
+              <span class="b-name">神通殿</span>
+              <span class="b-desc">技能升级</span>
+            </div>
+          </div>
+          <div class="section-title" style="margin-top:6px">📰 仙界动态</div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-size:11px;color:var(--white3);line-height:1.8" id="worldNews">
+            <div>📢 天道无常，修仙者当自强不息。</div>
+            <div>🌟 今日灵气充沛，修炼速度+20%</div>
+            <div>⚔️ 秘境「幽冥谷」已开启，速去探索！</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 修炼页 -->
+    <div class="page" id="pageCultivate">
+      <div class="cultivate-page">
+        <div class="cultivate-hero">
+          <div class="hero-portrait">
+            <div class="portrait-img" id="heroPortrait">🧝‍♀️</div>
+            <div class="realm-glow" id="realmGlow" style="box-shadow:0 0 15px var(--cyan)"></div>
+          </div>
+          <div class="hero-info">
+            <div class="hero-name" id="heroName">凌霜</div>
+            <div class="hero-realm" id="heroRealm">练气期 · 一层</div>
+          </div>
+          <div class="hero-stats">
+            <div class="stat-box"><div class="stat-label">⚔️ 攻击</div><div class="stat-val" id="statAtk">50</div></div>
+            <div class="stat-box"><div class="stat-label">🛡️ 防御</div><div class="stat-val" id="statDef">30</div></div>
+            <div class="stat-box"><div class="stat-label">❤️ 生命</div><div class="stat-val" id="statHp">500</div></div>
+            <div class="stat-box"><div class="stat-label">💨 速度</div><div class="stat-val" id="statSpd">20</div></div>
+            <div class="stat-box"><div class="stat-label">🍀 气运</div><div class="stat-val" id="statLuck">10</div></div>
+            <div class="stat-box"><div class="stat-label">✨ 神识</div><div class="stat-val" id="statSpirit">5</div></div>
+          </div>
+        </div>
+
+        <div class="realm-evolve" id="realmEvolve">
+          <div style="font-size:12px;color:var(--white2)">境界蜕变之路</div>
+          <div class="evolve-stage" id="evolveStage"></div>
+          <div class="evolve-label" id="evolveLabel">当前：练气期</div>
+        </div>
+
+        <div class="cultivate-actions">
+          <div class="cultivate-btn meditate" onclick="startCultivate()">
+            <span class="btn-icon">🧘‍♀️</span>
+            <span class="btn-text">打坐修炼</span>
+            <span class="btn-desc">闭目凝神，感悟天地灵气</span>
+          </div>
+          <div class="cultivate-btn" onclick="startCultivate(true)">
+            <span class="btn-icon">📚</span>
+            <span class="btn-text">研读功法</span>
+            <span class="btn-desc">消耗灵石，加速修炼</span>
+          </div>
+          <div class="cultivate-btn breakthrough" onclick="tryBreakthrough()" id="breakthroughBtn">
+            <span class="btn-icon">⚡</span>
+            <span class="btn-text">尝试突破</span>
+            <span class="btn-desc" id="btDesc">修为不足，继续修炼吧</span>
+          </div>
+        </div>
+
+        <div class="section-title">📋 功法</div>
+        <div id="techniqueList" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+    </div>
+
+    <!-- 洞府页 -->
+    <div class="page" id="pageCave">
+      <div class="cave-page">
+        <div class="cave-header">
+          <h2>🏔️ 洞府</h2>
+          <p>灵气浓度影响修炼速度</p>
+        </div>
+        <div class="cave-qi">
+          <span class="qi-label">🌿 灵气浓度</span>
+          <span class="qi-val" id="caveQi">Lv.1 · 灵气稀薄</span>
+        </div>
+        <div class="cave-rooms">
+          <div class="cave-room" onclick="openModal('cultivateRoomModal')">
+            <span class="room-icon">🧘‍♀️</span>
+            <span class="room-name">修炼室</span>
+            <span class="room-desc">打坐吐纳</span>
+            <span class="room-level">Lv.1</span>
+          </div>
+          <div class="cave-room" onclick="openModal('alchemyModal')">
+            <span class="room-icon">⚗️</span>
+            <span class="room-name">丹房</span>
+            <span class="room-desc">炼制丹药</span>
+            <span class="room-level">Lv.1</span>
+          </div>
+          <div class="cave-room" onclick="openModal('forgeModal')">
+            <span class="room-icon">🔨</span>
+            <span class="room-name">器室</span>
+            <span class="room-desc">打造法器</span>
+            <span class="room-level">Lv.1</span>
+          </div>
+          <div class="cave-room" onclick="openModal('gardenModal')">
+            <span class="room-icon">🌱</span>
+            <span class="room-name">药圃</span>
+            <span class="room-desc">种植灵草</span>
+            <span class="room-level">Lv.1</span>
+          </div>
+          <div class="cave-room" onclick="openModal('arrayModal')">
+            <span class="room-icon">🔮</span>
+            <span class="room-name">聚灵阵</span>
+            <span class="room-desc">提升灵气</span>
+            <span class="room-level">Lv.1</span>
+          </div>
+          <div class="cave-room" onclick="openModal('petModal')">
+            <span class="room-icon">🐾</span>
+            <span class="room-name">灵兽园</span>
+            <span class="room-desc">培养灵兽</span>
+            <span class="room-level">Lv.1</span>
+          </div>
+        </div>
+        <div class="section-title" style="margin-top:6px">📊 洞府收益</div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:12px;font-size:12px;color:var(--white2);line-height:2">
+          <div>⏱️ 离线时长：<span id="offlineTime">0分钟</span></div>
+          <div>✨ 离线修为：<span id="offlineXiuwei" style="color:var(--cyan)">+0</span></div>
+          <div>💰 离线灵石：<span id="offlineLingshi" style="color:var(--gold2)">+0</span></div>
+          <div style="margin-top:6px"><button class="btn btn-primary btn-block" onclick="collectOffline()">一键领取</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 秘境页 -->
+    <div class="page" id="pageRealm">
+      <div class="realm-page">
+        <div class="realm-map">
+          <div class="realm-title" id="realmMapTitle">🌲 灵兽林 · 一层</div>
+          <div class="monster-area" id="monsterArea"></div>
+        </div>
+        <div class="auto-fight-bar">
+          <div class="af-info" id="afInfo">挂机中：击杀 <span style="color:var(--cyan)">0</span> 只妖兽</div>
+          <button class="af-btn" id="afBtn" onclick="toggleAutoFight()">开始挂机</button>
+        </div>
+        <div class="section-title">🗺️ 秘境列表</div>
+        <div id="realmList" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+    </div>
+
+    <!-- 背包页 -->
+    <div class="page" id="pageBag">
+      <div class="bag-page">
+        <div class="bag-tabs">
+          <div class="bag-tab active" onclick="switchBagTab(0)">全部</div>
+          <div class="bag-tab" onclick="switchBagTab(1)">装备</div>
+          <div class="bag-tab" onclick="switchBagTab(2)">丹药</div>
+          <div class="bag-tab" onclick="switchBagTab(3)">材料</div>
+          <div class="bag-tab" onclick="switchBagTab(4)">功法</div>
+        </div>
+        <div class="bag-grid" id="bagGrid"></div>
+        <div style="text-align:center;margin-top:10px">
+          <button class="btn btn-secondary btn-sm" onclick="sortBag()">📦 一键整理</button>
+          <button class="btn btn-danger btn-sm" onclick="sellAll()">💰 一键出售</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部导航 -->
+  <div class="bottom-nav">
+    <div class="nav-item active" onclick="switchPage('Town')">
+      <span class="nav-icon">🏘️</span>
+      <span class="nav-label">城镇</span>
+    </div>
+    <div class="nav-item" onclick="switchPage('Cultivate')">
+      <span class="nav-icon">🧘‍♀️</span>
+      <span class="nav-label">修炼</span>
+    </div>
+    <div class="nav-item" onclick="switchPage('Cave')">
+      <span class="nav-icon">🏔️</span>
+      <span class="nav-label">洞府</span>
+    </div>
+    <div class="nav-item" onclick="switchPage('Realm')">
+      <span class="nav-icon">⚔️</span>
+      <span class="nav-label">秘境</span>
+      <span class="nav-badge" id="realmBadge" style="display:none">!</span>
+    </div>
+    <div class="nav-item" onclick="switchPage('Bag')">
+      <span class="nav-icon">🎒</span>
+      <span class="nav-label">行囊</span>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- 战斗界面 -->
+<div class="battle-scene" id="battleScene">
+  <div class="battle-header">
+    <span class="battle-title" id="battleTitle">⚔️ 战斗中</span>
+    <button class="battle-skip" onclick="skipBattle()">跳过</button>
+  </div>
+  <div class="battle-arena">
+    <div class="battle-entity player">
+      <span class="entity-icon" id="playerBattleIcon">🧝‍♀️</span>
+      <div class="entity-name" id="playerBattleName">凌霜</div>
+      <div class="entity-hp"><div class="entity-hp-fill" id="playerHpBar" style="width:100%"></div></div>
+      <div class="entity-hp-text" id="playerHpText">500/500</div>
+    </div>
+    <div class="battle-vs">⚡ VS ⚡</div>
+    <div class="battle-entity enemy">
+      <span class="entity-icon" id="enemyBattleIcon">🐺</span>
+      <div class="entity-name" id="enemyBattleName">灵狼</div>
+      <div class="entity-hp"><div class="entity-hp-fill" id="enemyHpBar" style="width:100%"></div></div>
+      <div class="entity-hp-text" id="enemyHpText">200/200</div>
+    </div>
+  </div>
+  <div class="battle-log" id="battleLog"></div>
+  <div class="battle-actions">
+    <button class="btn btn-primary" onclick="battleAction('attack')">⚔️ 攻击</button>
+    <button class="btn btn-cyan" onclick="battleAction('skill')">✨ 技能</button>
+    <button class="btn btn-secondary" onclick="battleAction('pill')">💊 丹药</button>
+    <button class="btn btn-danger" onclick="battleAction('flee')">🏃 逃跑</button>
+  </div>
+</div>
+
+<!-- 突破动画 -->
+<div class="breakthrough-anim" id="btAnim">
+  <div class="bt-circle" id="btCircle">⚡</div>
+  <div class="bt-text" id="btText">渡劫中...</div>
+  <div class="bt-sub" id="btSub">天道降下雷劫</div>
+</div>
+
+<!-- 剧情界面 -->
+<div class="story-scene" id="storyScene">
+  <div class="story-bg" id="storyBg" style="background:linear-gradient(180deg,#1a0a2a,#0a1a3a)"></div>
+  <div class="story-overlay"></div>
+  <div class="story-content">
+    <div class="story-speaker" id="storySpeaker"></div>
+    <div class="story-text" id="storyText"></div>
+    <div class="story-choices" id="storyChoices"></div>
+    <div class="story-continue" id="storyContinue" onclick="advanceStory()">▼ 点击继续</div>
+  </div>
+</div>
+
+<!-- 通用弹窗 -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<script>
+// ==================== 游戏数据定义 ====================
+
+// 境界体系
+const REALMS = [
+  {name:'练气',stages:['一层','二层','三层','四层','五层','六层','七层','八层','九层','大圆满'],xiuwei:[100,200,350,550,800,1100,1500,2000,2600,3500],icon:'🌬️',color:'#4ecdc4',title:'散修'},
+  {name:'筑基',stages:['初期','中期','后期','大圆满'],xiuwei:[5000,8000,12000,18000],icon:'🏗️',color:'#3498db',title:'筑基修士'},
+  {name:'金丹',stages:['初期','中期','后期','大圆满'],xiuwei:[30000,50000,80000,120000],icon:'🔮',color:'#9b59b6',title:'金丹真人'},
+  {name:'元婴',stages:['初期','中期','后期','大圆满'],xiuwei:[180000,280000,420000,600000],icon:'👶',color:'#e74c3c',title:'元婴老祖'},
+  {name:'化神',stages:['初期','中期','后期','大圆满'],xiuwei:[850000,1300000,2000000,3000000],icon:'🌟',color:'#f39c12',title:'化神大能'},
+  {name:'返虚',stages:['初期','中期','后期','大圆满'],xiuwei:[4500000,7000000,11000000,16000000],icon:'🌀',color:'#e67e22',title:'返虚真君'},
+  {name:'合体',stages:['初期','中期','后期','大圆满'],xiuwei:[24000000,38000000,60000000,90000000],icon:'💫',color:'#d4a853',title:'合体道君'},
+  {name:'大乘',stages:['初期','中期','后期','大圆满'],xiuwei:[130000000,200000000,320000000,500000000],icon:'👑',color:'#f0d080',title:'大乘仙尊'},
+  {name:'渡劫',stages:['一重天劫','二重天劫','三重天劫','九九天劫'],xiuwei:[700000000,1000000000,1500000000,3000000000],icon:'⚡',color:'#ff6b6b',title:'渡劫强者'},
+  {name:'仙帝',stages:['初临仙位','仙道大成','万仙之主','女帝至尊'],xiuwei:[5000000000,10000000000,50000000000,999999999999],icon:'👸',color:'#ffd700',title:'仙帝'}
+];
+
+// 女主立绘（随境界变化）
+const HERO_PORTRAITS = [
+  {realm:0,icon:'🧝‍♀️',style:'background:linear-gradient(180deg,#1a3a4a,#0a2a3a)'},
+  {realm:1,icon:'🧝‍♀️',style:'background:linear-gradient(180deg,#1a2a4a,#0a1a3a)'},
+  {realm:2,icon:'🧞‍♀️',style:'background:linear-gradient(180deg,#2a1a4a,#1a0a3a)'},
+  {realm:3,icon:'👸',style:'background:linear-gradient(180deg,#3a1a3a,#2a0a2a)'},
+  {realm:4,icon:'👸',style:'background:linear-gradient(180deg,#3a2a1a,#2a1a0a)'},
+  {realm:5,icon:'👸',style:'background:linear-gradient(180deg,#2a2a3a,#1a1a2a)'},
+  {realm:6,icon:'👑',style:'background:linear-gradient(180deg,#3a3a1a,#2a2a0a)'},
+  {realm:7,icon:'👑',style:'background:linear-gradient(180deg,#4a3a1a,#3a2a0a)'},
+  {realm:8,icon:'⚡',style:'background:linear-gradient(180deg,#4a1a1a,#3a0a0a)'},
+  {realm:9,icon:'👸',style:'background:linear-gradient(180deg,#4a3a0a,#3a2a00)'}
+];
+
+// 怪物数据
+const MONSTERS = [
+  // 灵兽林
+  {name:'灵兔',icon:'🐰',hp:80,atk:15,def:5,exp:20,lingshi:10,drops:[{id:'herb1',rate:0.3}],realm:0},
+  {name:'灵狼',icon:'🐺',hp:150,atk:25,def:10,exp:40,lingshi:20,drops:[{id:'herb1',rate:0.4},{id:'mat1',rate:0.2}],realm:0},
+  {name:'赤蟒',icon:'🐍',hp:300,atk:45,def:20,exp:80,lingshi:40,drops:[{id:'herb2',rate:0.3},{id:'mat1',rate:0.3}],realm:0},
+  {name:'妖狐',icon:'🦊',hp:500,atk:70,def:30,exp:150,lingshi:70,drops:[{id:'herb2',rate:0.4},{id:'equip1',rate:0.1}],realm:1},
+  // 幽冥谷
+  {name:'幽魂',icon:'👻',hp:800,atk:100,def:40,exp:250,lingshi:100,drops:[{id:'herb3',rate:0.3},{id:'mat2',rate:0.2}],realm:1},
+  {name:'骨将',icon:'💀',hp:1200,atk:150,def:60,exp:400,lingshi:150,drops:[{id:'pill1',rate:0.2},{id:'equip2',rate:0.1}],realm:2},
+  {name:'冥蛟',icon:'🐉',hp:2500,atk:250,def:100,exp:800,lingshi:300,drops:[{id:'pill2',rate:0.2},{id:'equip3',rate:0.08}],realm:2},
+  // 天劫峰
+  {name:'雷兽',icon:'⚡',hp:5000,atk:400,def:180,exp:1500,lingshi:500,drops:[{id:'pill3',rate:0.15},{id:'equip4',rate:0.05}],realm:3},
+  {name:'天魔',icon:'👹',hp:10000,atk:700,def:300,exp:3000,lingshi:1000,drops:[{id:'pill4',rate:0.1},{id:'equip5',rate:0.03}],realm:4},
+];
+
+// 秘境列表
+const SECRET_REALMS = [
+  {name:'灵兽林',icon:'🌲',desc:'适合练气期修士',minRealm:0,monsters:[0,1,2,3]},
+  {name:'幽冥谷',icon:'🌑',desc:'适合筑基期修士',minRealm:1,monsters:[3,4,5,6]},
+  {name:'天劫峰',icon:'⚡',desc:'适合金丹期以上',minRealm:2,monsters:[5,6,7,8]},
+  {name:'仙魔战场',icon:'🔥',desc:'适合元婴期以上',minRealm:3,monsters:[6,7,8]},
+];
+
+// 道具数据
+const ITEMS = {
+  // 材料
+  herb1:{name:'灵草',icon:'🌿',type:'material',desc:'普通灵草，炼丹基础材料',price:10},
+  herb2:{name:'朱果',icon:'🍎',type:'material',desc:'火属性灵果',price:30},
+  herb3:{name:'幽冥花',icon:'🌺',type:'material',desc:'阴属性灵花',price:80},
+  mat1:{name:'兽骨',icon:'🦴',type:'material',desc:'妖兽骨骼',price:20},
+  mat2:{name:'妖丹',icon:'💎',type:'material',desc:'妖兽内丹',price:100},
+  // 丹药
+  pill1:{name:'聚气丹',icon:'💊',type:'pill',desc:'恢复200灵力',effect:{xiuwei:200},price:50,rarity:'green'},
+  pill2:{name:'筑基丹',icon:'💊',type:'pill',desc:'突破筑基必备',effect:{breakthrough:1},price:500,rarity:'blue'},
+  pill3:{name:'金丹露',icon:'🧪',type:'pill',desc:'增加1000修为',effect:{xiuwei:1000},price:200,rarity:'purple'},
+  pill4:{name:'破境丹',icon:'🧪',type:'pill',desc:'突破成功率+20%',effect:{breakthroughRate:20},price:1000,rarity:'orange'},
+  pill5:{name:'回血丹',icon:'❤️',type:'pill',desc:'战斗中恢复30%生命',effect:{heal:0.3},price:30,rarity:'white'},
+  // 装备
+  equip1:{name:'青锋剑',icon:'🗡️',type:'equip',slot:'weapon',desc:'初学者之剑',stats:{atk:20},price:200,rarity:'green'},
+  equip2:{name:'玄铁甲',icon:'🛡️',type:'equip',slot:'armor',desc:'坚固的防御',stats:{def:15,hp:100},price:300,rarity:'green'},
+  equip3:{name:'紫电飞剑',icon:'⚡',type:'equip',slot:'weapon',desc:'蕴含雷电之力',stats:{atk:50,spd:10},price:800,rarity:'blue'},
+  equip4:{name:'天蚕宝衣',icon:'👘',type:'equip',slot:'armor',desc:'刀枪不入',stats:{def:40,hp:300},price:1000,rarity:'purple'},
+  equip5:{name:'混元珠',icon:'🔮',type:'equip',slot:'accessory',desc:'增加神识',stats:{spirit:20,luck:10},price:600,rarity:'blue'},
+  equip6:{name:'仙帝冠',icon:'👑',type:'equip',slot:'accessory',desc:'传说中的仙帝之物',stats:{atk:100,def:80,hp:500,spirit:50},price:10000,rarity:'orange'},
+  // 功法
+  tech1:{name:'基础吐纳术',icon:'📖',type:'technique',desc:'修炼速度+10%',effect:{cultivateSpeed:0.1},price:100,rarity:'white'},
+  tech2:{name:'五行归元功',icon:'📖',type:'technique',desc:'修炼速度+25%',effect:{cultivateSpeed:0.25},price:500,rarity:'green'},
+  tech3:{name:'紫霄剑诀',icon:'📖',type:'technique',desc:'攻击+15%，修炼速度+20%',effect:{atkBonus:0.15,cultivateSpeed:0.2},price:2000,rarity:'blue'},
+  tech4:{name:'太上忘情录',icon:'📖',type:'technique',desc:'全属性+10%',effect:{allBonus:0.1},price:8000,rarity:'purple'},
+};
+
+// 炼丹配方
+const RECIPES = [
+  {id:'pill1',name:'聚气丹',icon:'💊',materials:[{id:'herb1',count:3}],successRate:0.9,rarity:'green'},
+  {id:'pill2',name:'筑基丹',icon:'💊',materials:[{id:'herb2',count:5},{id:'mat1',count:3}],successRate:0.6,rarity:'blue'},
+  {id:'pill3',name:'金丹露',icon:'🧪',materials:[{id:'herb3',count:3},{id:'mat2',count:2}],successRate:0.5,rarity:'purple'},
+  {id:'pill5',name:'回血丹',icon:'❤️',materials:[{id:'herb1',count:2}],successRate:0.95,rarity:'white'},
+];
+
+// 剧情数据
+const STORY_CHAPTERS = [
+  {
+    id:'ch1',title:'第一章：初入仙途',bg:'linear-gradient(180deg,#1a0a2a,#0a1a3a)',
+    scenes:[
+      {speaker:'',text:'你叫凌霜，自幼生长在青云山脚的小村庄里。一日上山采药时，你发现了一块散发着微光的玉佩……',choices:[
+        {text:'捡起玉佩',next:1},
+        {text:'小心翼翼地观察',next:1}
+      ]},
+      {speaker:'凌霜',text:'玉佩入手的瞬间，一股暖流涌入你的经脉。你感到体内似乎有什么东西被唤醒了……',choices:[
+        {text:'尝试运转这股力量',next:2},
+        {text:'惊慌失措地扔掉',next:2}
+      ]},
+      {speaker:'???',text:'「小姑娘，你体内有灵根。」一个苍老的声音从身后传来。你转身，看见一位白发老者正微笑着看着你。',choices:[
+        {text:'「前辈是？」',next:3},
+        {text:'警惕地后退',next:3}
+      ]},
+      {speaker:'清虚真人',text:'「老夫清虚，清虚观观主。你愿意随我上山修行吗？修仙之路虽艰险，却能超脱凡俗，长生久视。」',choices:[
+        {text:'「弟子愿意！」（拜师）',next:4,reward:{xiuwei:50}},
+        {text:'「容我考虑……」',next:4,reward:{xiuwei:30}}
+      ]},
+      {speaker:'',text:'从此，你踏上了修仙之路。清虚观的日子清苦而充实，每日打坐修炼，感悟天地灵气。你知道，这只是漫漫长路的起点……',choices:[
+        {text:'开始修炼（进入游戏）',next:-1}
+      ],reward:{title:'外门弟子',item:'tech1'}
+    ]
+  },
+  {
+    id:'ch2',title:'第二章：初露锋芒',bg:'linear-gradient(180deg,#0a1a3a,#1a2a4a)',minRealm:1,
+    scenes:[
+      {speaker:'',text:'筑基成功后，你在宗门中的地位有了明显提升。一年一度的宗门大比即将开始，各峰弟子都在积极备战。',choices:[
+        {text:'报名参加',next:1},
+        {text:'继续闭关修炼',next:2}
+      ]},
+      {speaker:'师姐·苏婉',text:'「凌霜师妹，今年的大比你可要参加啊。听说隔壁苍云峰的那个叶凌风也在报名名单里，他可是筑基巅峰呢。」',choices:[
+        {text:'「正好，我想试试自己的实力。」',next:3},
+        {text:'「叶凌风很强吗？」',next:3}
+      ]},
+      {speaker:'',text:'你选择闭关修炼，实力有了显著提升。但你也听说，宗门大比的优胜者可以获得珍贵的筑基丹和进入秘境的资格。',choices:[
+        {text:'决定参加大比',next:3}
+      ]},
+      {speaker:'',text:'宗门大比开始了！经过层层选拔，你一路过关斩将，最终站在了决赛的擂台上。你的对手，正是苍云峰首席弟子——叶凌风。',choices:[
+        {text:'全力以赴！',next:4,reward:{lingshi:500}},
+        {text:'以守代攻，寻找破绽',next:4,reward:{lingshi:300}}
+      ]},
+      {speaker:'',text:'一场激烈的战斗后，你以微弱优势获胜！全场哗然——一个入门仅两年的弟子，竟然击败了苍云峰首席。清虚真人欣慰地点了点头。',choices:[
+        {text:'领取奖励',next:-1,reward:{title:'内门弟子',item:'equip3',xiuwei:2000}}
+      ]}
+    ]
+  },
+  {
+    id:'ch3',title:'第三章：金丹之路',bg:'linear-gradient(180deg,#1a0a3a,#2a1a4a)',minRealm:2,
+    scenes:[
+      {speaker:'',text:'金丹期，是修仙之路的重要分水岭。成则仙途坦荡，败则前功尽弃。你需要收集足够的材料，炼制一枚品质上乘的金丹。',choices:[
+        {text:'前往秘境寻找材料',next:1},
+        {text:'向师父请教',next:2}
+      ]},
+      {speaker:'',text:'你深入幽冥谷，与众多妖兽搏斗。在谷底，你发现了一株千年灵芝，但守护它的是一条化形期的冥蛟……',choices:[
+        {text:'与冥蛟战斗',next:3},
+        {text:'设陷阱智取',next:3}
+      ]},
+      {speaker:'清虚真人',text:'「霜儿，结丹之时，需心如止水。你心中可有什么放不下的执念？」',choices:[
+        {text:'「弟子只求大道。」',next:3,reward:{luck:5}},
+        {text:'沉默不语',next:3}
+      ]},
+      {speaker:'',text:'天空中乌云密布，雷声滚滚。你的金丹正在体内凝聚，天劫也随之降临。第一道天雷劈下——',choices:[
+        {text:'硬抗天雷！',next:4},
+        {text:'使用护身法宝',next:4}
+      ]},
+      {speaker:'',text:'九道天雷过后，你成功结成金丹！一颗散发着紫光的金丹在你丹田中缓缓旋转。从此，你便是金丹真人，在修仙界已有一席之地。',choices:[
+        {text:'继续前行',next:-1,reward:{title:'金丹真人',item:'equip4',xiuwei:10000}}
+      ]}
+    ]
+  },
+  {
+    id:'ch4',title:'第四章：魔劫降临',bg:'linear-gradient(180deg,#2a0a0a,#1a0a1a)',minRealm:3,
+    scenes:[
+      {speaker:'',text:'修仙界突然传来噩耗——魔族入侵了！数个宗门被魔族攻破，无数修士陨落。清虚观也收到了求援信。',choices:[
+        {text:'主动请缨参战',next:1},
+        {text:'守护宗门',next:2}
+      ]},
+      {speaker:'',text:'你来到前线，看到了修罗场般的景象。到处是残垣断壁和修士的尸体。一位元婴期的长老正在与魔将苦战。',choices:[
+        {text:'出手相助',next:3},
+        {text:'先救受伤的弟子',next:3}
+      ]},
+      {speaker:'',text:'守护宗门期间，你发现了魔族的内应——竟然是宗门中的某位长老。他一直在暗中向魔族传递情报。',choices:[
+        {text:'揭露内应',next:3,reward:{lingshi:2000}},
+        {text:'暗中收集证据',next:3,reward:{lingshi:1000}}
+      ]},
+      {speaker:'魔将·厉无极',text:'「哈哈哈，区区一个元婴小儿，也敢挡本座的路？识相的就让开，否则——灰飞烟灭！」',choices:[
+        {text:'「魔族休想！」',next:4},
+        {text:'「你为何入侵人界？」',next:4}
+      ]},
+      {speaker:'',text:'一场惊天大战后，你击退了魔将厉无极。你的名字传遍了整个修仙界——「青云山凌霜，以元婴之境击退化神魔将！」但你知道，这只是开始……',choices:[
+        {text:'继续修炼',next:-1,reward:{title:'青云剑仙',item:'equip5',xiuwei:50000}}
+      ]}
+    ]
+  },
+  {
+    id:'ch5',title:'第五章：女帝之路',bg:'linear-gradient(180deg,#3a2a0a,#1a1a00)',minRealm:5,
+    scenes:[
+      {speaker:'',text:'经过数百年的修炼，你已是返虚境的大能。修仙界群雄割据，正道盟主之位空悬已久。许多人提议由你来担任。',choices:[
+        {text:'「我不适合。」',next:1},
+        {text:'「若大家信任，我愿一试。」',next:2}
+      ]},
+      {speaker:'',text:'你婉拒了盟主之位，继续潜心修炼。但修仙界的动荡让你无法置身事外——魔族再次蠢蠢欲动，而正道内部也矛盾重重。',choices:[
+        {text:'暗中调停各方矛盾',next:3},
+        {text:'专注于自己的修炼',next:3}
+      ]},
+      {speaker:'',text:'你接受了盟主之位。上任后，你推行了一系列改革：整合宗门资源、建立修士学院、制定修仙界秩序。虽然阻力重重，但你的威望和实力让一切逐渐步入正轨。',choices:[
+        {text:'继续推行改革',next:3}
+      ]},
+      {speaker:'',text:'在你的带领下，正道修士团结一心，与魔族展开了最终决战。你亲自迎战魔尊——一个活了万年的恐怖存在。',choices:[
+        {text:'以命相搏！',next:4},
+        {text:'寻找魔尊的弱点',next:4}
+      ]},
+      {speaker:'',text:'最终决战持续了三天三夜。在最后一刻，你领悟了天道法则，一举击溃魔尊！天地之间，金光万丈。你感到体内的力量在疯狂膨胀——这是……渡劫！',choices:[
+        {text:'迎接天劫！',next:5}
+      ]},
+      {speaker:'',text:'九九八十一道天雷，你一一接下。当最后一道天雷消散时，你的修为突破了所有桎梏——你，凌霜，成为了这片天地间独一无二的存在。\n\n仙帝。\n\n万仙朝拜，天地同贺。你站在云端，俯瞰众生。从那个在山脚下捡到玉佩的小女孩，到如今统御万界的女帝——这条路，你走了整整一千年。',choices:[
+        {text:'👑 登临帝位（女帝结局）',next:-1,reward:{title:'仙帝',item:'equip6',xiuwei:999999999}}
+      ]}
+    ]
+  }
+];
+
+// 排行榜NPC
+const RANK_NPCS = [
+  {name:'叶凌风',realm:'筑基大圆满',val:18000},
+  {name:'苏婉',realm:'金丹初期',val:32000},
+  {name:'厉无极',realm:'元婴后期',val:580000},
+  {name:'清虚真人',realm:'化神初期',val:900000},
+  {name:'天机老人',realm:'返虚中期',val:8000000},
+  {name:'魔尊',realm:'合体大圆满',val:90000000},
+  {name:'道祖',realm:'大乘圆满',val:500000000},
+];
+
+// ==================== 游戏状态 ====================
+let G = {
+  name:'凌霜',
+  realmIndex:0,     // 大境界索引
+  stageIndex:0,     // 小境界索引
+  xiuwei:0,         // 当前修为
+  totalXiuwei:0,    // 总修为
+  lingshi:1000,     // 灵石
+  xianyuan:0,       // 仙缘
+  hp:500,maxHp:500,
+  atk:50,def:30,spd:20,luck:10,spirit:5,
+  bag:[],           // [{id,count}]
+  equips:{weapon:null,armor:null,accessory:null},
+  techniques:['tech1'],
+  currentRealm:0,   // 当前秘境
+  autoFight:false,
+  autoFightCount:0,
+  storyProgress:{ch1:5}, // 已完成的章节
+  tasks:{cultivate:0,fight:0,alchemy:0},
+  lastOnline:Date.now(),
+  offlineXiuwei:0,
+  offlineLingshi:0,
+  totalKills:0,
+  breakthroughBonus:0,
+  cultivateSpeed:1,
+};
+
+// ==================== 工具函数 ====================
+function $(id){return document.getElementById(id)}
+function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
+
+function showToast(msg,type=''){
+  const t=$('toast');
+  t.textContent=msg;t.className='toast show '+(type||'');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.className='toast',2000);
+}
+
+function floatText(text,color='#fff',x=window.innerWidth/2,y=window.innerHeight/2){
+  const el=document.createElement('div');
+  el.className='float-text';el.textContent=text;
+  el.style.cssText=`left:${x}px;top:${y}px;color:${color}`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1500);
+}
+
+function formatNum(n){
+  if(n>=1e8)return (n/1e8).toFixed(1)+'亿';
+  if(n>=1e4)return (n/1e4).toFixed(1)+'万';
+  return n.toString();
+}
+
+// ==================== 页面切换 ====================
+function switchPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  $('page'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach((n,i)=>{
+    const pages=['Town','Cultivate','Cave','Realm','Bag'];
+    n.classList.toggle('active',pages[i]===name);
+  });
+  if(name==='Cultivate')updateCultivatePage();
+  if(name==='Bag')updateBagPage();
+  if(name==='Realm')updateRealmPage();
+}
+
+// ==================== 弹窗系统 ====================
+function openModal(id){
+  const modal=$('modalContent');
+  let html='';
+  switch(id){
+    case 'cultivateModal':html=buildCultivateModal();break;
+    case 'alchemyModal':html=buildAlchemyModal();break;
+    case 'forgeModal':html=buildForgeModal();break;
+    case 'shopModal':html=buildShopModal();break;
+    case 'taskModal':html=buildTaskModal();break;
+    case 'rankModal':html=buildRankModal();break;
+    case 'storyModal':html=buildStoryModal();break;
+    case 'divineModal':html=buildDivineModal();break;
+    case 'skillModal':html=buildSkillModal();break;
+    case 'gardenModal':html=buildGardenModal();break;
+    case 'arrayModal':html=buildArrayModal();break;
+    case 'petModal':html=buildPetModal();break;
+    case 'itemDetail':html=buildItemDetailModal(id);break;
+    default:html='<div class="modal-header"><h3>功能开发中</h3><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body"><p style="text-align:center;color:var(--white3);padding:20px">🚧 该功能即将开放，敬请期待</p></div>';
+  }
+  modal.innerHTML=html;
+  $('modalOverlay').classList.add('show');
+}
+
+function closeModal(){$('modalOverlay').classList.remove('show')}
+function closeModalOutside(e){if(e.target===$('modalOverlay'))closeModal()}
+
+function buildCultivateModal(){
+  return `<div class="modal-header"><h3>🧘‍♀️ 修炼场</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+  <div class="modal-body">
+    <div style="text-align:center;padding:10px 0">
+      <div style="font-size:40px;margin-bottom:8px">🧘‍♀️</div>
+      <div style="font-size:14px;color:var(--white)">闭目打坐，感悟天地灵气</div>
+      <div style="font-size:12px;color:var(--white3);margin-top:4px">当前修炼速度：×${G.cultivateSpeed.toFixed(1)}</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn btn-cyan btn-block" onclick="startCultivate();closeModal()">🧘‍♀️ 打坐修炼</button>
+      <button class="btn btn-primary btn-block" onclick="startCultivate(true);closeModal()">📚 研读功法(50💎)</button>
+    </div>
+  </div>`;
+}
+
+function buildAlchemyModal(){
+  let html=`<div class="modal-header"><h3>⚗️ 炼丹房</h3><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body"><div class="recipe-list">`;
+  RECIPES.forEach(r=>{
+    const item=ITEMS[r.id];
+    let matsHtml=r.materials.map(m=>{
+      const cnt=countItem(m.id);
+      const mi=ITEMS[m.id];
+      return `<span style="color:${cnt>=m.count?'var(--green)':'var(--red)'}">${mi.icon}${mi.name}×${m.count}(${cnt})</span>`;
+    }).join(' ');
+    html+=`<div class="recipe-item">
+      <span class="r-icon">${r.icon}</span>
+      <div class="r-info">
+        <div class="r-name" style="color:${rarityColor(r.rarity)}">${r.name}</div>
+        <div class="r-desc">${item.desc} · 成功率${Math.round(r.successRate*100)}%</div>
+        <div class="r-desc" style="margin-top:2px">${matsHtml}</div>
+      </div>
+      <button class="r-btn" onclick="doAlchemy('${r.id}')">炼制</button>
+    </div>`;
+  });
+  html+=`</div></div>`;
+  return html;
+}
+
+function buildForgeModal(){
+  return `<div class="modal-header"><h3>🔨 炼器室</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+  <div class="modal-body">
+    <div style="text-align:center;padding:20px 0">
+      <div style="font-size:40px;margin-bottom:8px">🔨</div>
+      <div style="font-size:14px;color:var(--white)">消耗材料打造装备</div>
+    </div>
+    <div class="recipe-list">
+      <div class="recipe-item" onclick="doForge('equip1')">
+        <span class="r-icon">🗡️</span>
+        <div class="r-info">
+          <div class="r-name" style="color:var(--green)">青锋剑</div>
+          <div class="r-desc">攻击+20 · 需要：兽骨×5</div>
+        </div>
+        <button class="r-btn">打造</button>
+      </div>
+      <div class="recipe-item" onclick="doForge('equip2')">
+        <span class="r-icon">🛡️</span>
+        <div class="r-info">
+          <div class="r-name" style="color:var(--green)">玄铁甲</div>
+          <div class="r-desc">防御+15 生命+100 · 需要：兽骨×8 灵草×3</div>
+        </div>
+        <button class="r-btn">打造</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildShopModal(){
+  let html=`<div class="modal-header"><h3>🏪 坊市</h3><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body"><div class="recipe-list">`;
+  const shopItems=['herb1','herb2','herb3','mat1','mat2','pill1','pill5','equip1','equip2','tech1'];
+  shopItems.forEach(id=>{
+    const it=ITEMS[id];
+    html+=`<div class="recipe-item">
+      <span class="r-icon">${it.icon}</span>
+      <div class="r-info">
+        <div class="r-name" style="color:${rarityColor(it.rarity||'white')}">${it.name}</div>
+        <div class="r-desc">${it.desc}</div>
+      </div>
+      <button class="r-btn" onclick="buyItem('${id}')">${it.price}💎</button>
+    </div>`;
+  });
+  html+=`</div></div>`;
+  return html;
+}
+
+function buildTaskModal(){
+  const tasks=[
+    {icon:'🧘‍♀️',name:'修炼',desc:'打坐修炼3次',progress:G.tasks.cultivate,max:3,reward:'50💎',id:'cultivate'},
+    {icon:'⚔️',name:'斩妖',desc:'击败5只妖兽',progress:G.tasks.fight,max:5,reward:'100💎',id:'fight'},
+    {icon:'⚗️',name:'炼丹',desc:'炼制2次丹药',progress:G.tasks.alchemy,max:2,reward:'80💎',id:'alchemy'},
+  ];
+  let html=`<div class="modal-header"><h3>📜 每日任务</h3><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body"><div class="daily-tasks">`;
+  tasks.forEach(t=>{
+    const done=t.progress>=t.max;
+    html+=`<div class="task-item">
+      <span class="t-icon">${t.icon}</span>
+      <div class="t-info">
+        <div class="t-name">${t.name}</div>
+        <div class="t-progress">${t.desc} (${t.progress}/${t.max})</div>
+        <div class="t-progress-bar"><div class="t-progress-fill" style="width:${(t.progress/t.max*100)}%"></div></div>
+      </div>
+      <div class="t-reward">${t.reward}</div>
+      <button class="t-btn ${done?'':'done'}" onclick="claimTask('${t.id}',${done})">${done?'领取':'未完成'}</button>
+    </div>`;
+  });
+  html+=`</div></div>`;
+  return html;
+}
+
+function buildRankModal(){
+  const realmName=REALMS[G.realmIndex].name+REALMS[G.realmIndex].stages[G.stageIndex];
+  let html=`<div class="modal-header"><h3>🏆 论剑台</h3><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body"><div class="rank-list">`;
+  // 插入玩家
+  const allRanks=[{name:'👑 '+G.name,realm:realmName,val:G.totalXiuwei,isPlayer:true},...RANK_NPCS].sort((a,b)=>b.val-a.val);
+  allRanks.forEach((r,i)=>{
+    html+=`<div class="rank-item" style="${r.isPlayer?'background:rgba(78,205,196,.1);border-color:var(--cyan)':''}">
+      <div class="rank-num">${i+1}</div>
+      <div class="rank-name">${r.name}</div>
+      <div class="rank-val">${r.realm}</div>
+    </div>`;
+  });
+  html+=`</div></div>`;
+  return html;
+}
+
+function buildStoryModal(){
+  let html=`<div class="modal-header"><h3>📖 仙途录</h3><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body"><div class="recipe-list">`;
+  STORY_CHAPTERS.forEach(ch=>{
+    const completed=G.storyProgress[ch.id]||0;
+    const totalScenes=ch.scenes.length;
+    const locked=ch.minRealm&&G.realmIndex<ch.minRealm;
+    html+=`<div class="recipe-item" onclick="${locked?'':`startStoryChapter('${ch.id}')`}" style="${locked?'opacity:.4':''}">
+      <span class="r-icon">${ch.minRealm&&G.realmIndex<ch.minRealm?'🔒':'📖'}</span>
+      <div class="r-info">
+        <div class="r-name">${ch.title}</div>
+        <div class="r-desc">${locked?`需要${REALMS[ch.minRealm].name}期解锁`:`进度：${completed}/${totalScenes}`}</div>
+      </div>
+      ${completed>=totalScenes?'<span style="color:var(--gold);font-size:12px">✅</span>':'<button class="r-btn">'+(completed>0?'继续':'开始')+'</button>'}
+    </div>`;
+  });
+  html+=`</div></div>`;
+  return html;
+}
+
+function buildDivineModal(){
+  return `<div class="modal-header"><h3>🔮 天机阁</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+  <div class="modal-body">
+    <div style="text-align:center;padding:10px 0">
+      <div style="font-size:40px;margin-bottom:8px">🔮</div>
+      <div style="font-size:14px;color:var(--white)">消耗仙缘兑换稀有物品</div>
+      <div style="font-size:12px;color:var(--white3);margin-top:4px">当前仙缘：${G.xianyuan}</div>
+    </div>
+    <div class="recipe-list">
+      <div class="recipe-item" onclick="divineExchange('pill4')">
+        <span class="r-icon">🧪</span>
+        <div class="r-info"><div class="r-name" style="color:var(--gold)">破境丹</div><div class="r-desc">突破成功率+20%</div></div>
+        <button class="r-btn">100🪙</button>
+      </div>
+      <div class="recipe-item" onclick="divineExchange('tech3')">
+        <span class="r-icon">📖</span>
+        <div class="r-info"><div class="r-name" style="color:var(--blue)">紫霄剑诀</div><div class="r-desc">攻击+15%，修炼速度+20%</div></div>
+        <button class="r-btn">200🪙</button>
+      </div>
+      <div class="recipe-item" onclick="divineExchange('tech4')">
+        <span class="r-icon">📖</span>
+        <div class="r-info"><div class="r-name" style="color:var(--purple)">太上忘情录</div><div class="r-desc">全属性+10%</div></div>
+        <button class="r-btn">500🪙</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildSkillModal(){
+  let html=`<div class="modal-header"><h3>✨ 神通殿</h3><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body"><div class="recipe-list">`;
+  G.techniques.forEach(tid=>{
+    const t=ITEMS[tid];
+    if(!t)return;
+    html+=`<div class="recipe-item">
+      <span class="r-icon">${t.icon}</span>
+      <div class="r-info">
+        <div class="r-name" style="color:${rarityColor(t.rarity||'white')}">${t.name}</div>
+        <div class="r-desc">${t.desc}</div>
+      </div>
+      <span style="color:var(--green);font-size:11px">已修炼</span>
+    </div>`;
+  });
+  if(G.techniques.length===0)html+=`<div style="text-align:center;padding:20px;color:var(--white3)">暂无功法</div>`;
+  html+=`</div></div>`;
+  return html;
+}
+
+function buildGardenModal(){
+  return `<div class="modal-header"><h3>🌱 药圃</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+  <div class="modal-body">
+    <div style="text-align:center;padding:20px 0">
+      <div style="font-size:40px;margin-bottom:8px">🌱</div>
+      <div style="font-size:14px;color:var(--white)">种植灵草，定时收获</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-secondary btn-block" onclick="plantHerb('herb1')">🌿 种植灵草（10💎）</button>
+      <button class="btn btn-secondary btn-block" onclick="plantHerb('herb2')">🍎 种植朱果（30💎）</button>
+      <div style="text-align:center;margin-top:8px;font-size:12px;color:var(--white3)">🌱 成熟时间：30秒</div>
+    </div>
+  </div>`;
+}
+
+function buildArrayModal(){
+  return `<div class="modal-header"><h3>🔮 聚灵阵</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+  <div class="modal-body">
+    <div style="text-align:center;padding:20px 0">
+      <div style="font-size:40px;margin-bottom:8px">🔮</div>
+      <div style="font-size:14px;color:var(--white)">升级聚灵阵提升洞府灵气</div>
+      <div style="font-size:12px;color:var(--cyan);margin-top:4px">当前灵气加成：×${G.cultivateSpeed.toFixed(1)}</div>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="upgradeArray()">🔮 升级聚灵阵（500💎）</button>
+  </div>`;
+}
+
+function buildPetModal(){
+  return `<div class="modal-header"><h3>🐾 灵兽园</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+  <div class="modal-body">
+    <div style="text-align:center;padding:20px 0">
+      <div style="font-size:40px;margin-bottom:8px">🐾</div>
+      <div style="font-size:14px;color:var(--white)">捕捉和培养灵兽</div>
+    </div>
+    <div style="font-size:12px;color:var(--white3);text-align:center">击败妖兽后有概率捕捉幼崽</div>
+  </div>`;
+}
+
+function rarityColor(r){
+  const colors={white:'#aaa',green:'#2ecc71',blue:'#3498db',purple:'#9b59b6',orange:'#d4a853'};
+  return colors[r]||'#aaa';
+}
+
+// ==================== 修炼系统 ====================
+function startCultivate(useLingshi=false){
+  if(useLingshi&&G.lingshi<50){showToast('灵石不足！','error');return}
+  if(useLingshi)G.lingshi-=50;
+
+  const realm=REALMS[G.realmIndex];
+  const baseXiuwei=10+G.realmIndex*5;
+  const speedBonus=G.cultivateSpeed;
+  const lingshiBonus=useLingshi?3:1;
+  const gain=Math.floor(baseXiuwei*speedBonus*lingshiBonus*(0.8+Math.random()*0.4));
+
+  G.xiuwei+=gain;
+  G.totalXiuwei+=gain;
+  G.tasks.cultivate=Math.min(G.tasks.cultivate+1,99);
+
+  floatText(`+${gain}修为`,'#4ecdc4');
+  showToast(`修炼获得 ${gain} 修为${useLingshi?' (研读功法)':''}`,'success');
+  updateUI();
+  saveGame();
+}
+
+function tryBreakthrough(){
+  const realm=REALMS[G.realmIndex];
+  const needed=realm.xiuwei[G.stageIndex];
+  if(G.xiuwei<needed){
+    showToast('修为不足，继续修炼吧！','error');
+    return;
+  }
+
+  // 突破动画
+  const anim=$('btAnim');
+  const isLastRealm=G.realmIndex>=REALMS.length-1&&G.stageIndex>=realm.stages.length-1;
+  anim.classList.add('show');
+  $('btText').textContent=isLastRealm?'飞升成帝！':'渡劫突破中...';
+  $('btSub').textContent=isLastRealm?'天道降下九九天劫':'天道降下雷劫';
+  $('btCircle').textContent=realm.icon;
+
+  setTimeout(()=>{
+    // 计算成功率
+    let rate=0.6+G.luck*0.01+G.breakthroughBonus;
+    rate=clamp(rate,0.3,0.95);
+    if(Math.random()<rate){
+      // 成功
+      G.xiuwei-=needed;
+      G.breakthroughBonus=0;
+      if(G.stageIndex<realm.stages.length-1){
+        G.stageIndex++;
+      }else if(G.realmIndex<REALMS.length-1){
+        G.realmIndex++;
+        G.stageIndex=0;
+      }
+      // 属性提升
+      levelUpStats();
+      anim.classList.remove('show');
+      const newRealm=REALMS[G.realmIndex];
+      showToast(`🎉 突破成功！晋升${newRealm.name}${newRealm.stages[G.stageIndex]}！`,'gold');
+      floatText('突破成功！','#ffd700');
+      // 奖励仙缘
+      G.xianyuan+=10+G.realmIndex*5;
+      updateUI();
+      saveGame();
+    }else{
+      // 失败
+      const loss=Math.floor(needed*0.2);
+      G.xiuwei=Math.max(0,G.xiuwei-loss);
+      G.breakthroughBonus+=5;
+      anim.classList.remove('show');
+      showToast(`💥 突破失败！损失${loss}修为，下次成功率提升`,'error');
+      updateUI();
+      saveGame();
+    }
+  },2000);
+}
+
+function levelUpStats(){
+  const mult=1+G.realmIndex*0.15;
+  G.maxHp=Math.floor((500+G.realmIndex*200+G.stageIndex*50)*mult);
+  G.hp=G.maxHp;
+  G.atk=Math.floor((50+G.realmIndex*30+G.stageIndex*10)*mult);
+  G.def=Math.floor((30+G.realmIndex*20+G.stageIndex*5)*mult);
+  G.spd=Math.floor((20+G.realmIndex*8+G.stageIndex*3)*mult);
+  G.luck=Math.floor(10+G.realmIndex*3);
+  G.spirit=Math.floor(5+G.realmIndex*2);
+  // 应用装备加成
+  applyEquipStats();
+  // 应用功法加成
+  applyTechniqueStats();
+}
+
+function applyEquipStats(){
+  // 重置为基础值
+  const mult=1+G.realmIndex*0.15;
+  G.maxHp=Math.floor((500+G.realmIndex*200+G.stageIndex*50)*mult);
+  G.atk=Math.floor((50+G.realmIndex*30+G.stageIndex*10)*mult);
+  G.def=Math.floor((30+G.realmIndex*20+G.stageIndex*5)*mult);
+  G.spd=Math.floor((20+G.realmIndex*8+G.stageIndex*3)*mult);
+  G.luck=Math.floor(10+G.realmIndex*3);
+  G.spirit=Math.floor(5+G.realmIndex*2);
+  // 装备加成
+  for(const slot in G.equips){
+    const eid=G.equips[slot];
+    if(!eid)continue;
+    const item=ITEMS[eid];
+    if(!item||!item.stats)continue;
+    for(const k in item.stats){
+      if(k==='atk')G.atk+=item.stats[k];
+      else if(k==='def')G.def+=item.stats[k];
+      else if(k==='hp')G.maxHp+=item.stats[k];
+      else if(k==='spd')G.spd+=item.stats[k];
+      else if(k==='luck')G.luck+=item.stats[k];
+      else if(k==='spirit')G.spirit+=item.stats[k];
+    }
+  }
+  G.hp=Math.min(G.hp,G.maxHp);
+}
+
+function applyTechniqueStats(){
+  G.cultivateSpeed=1;
+  G.techniques.forEach(tid=>{
+    const t=ITEMS[tid];
+    if(!t||!t.effect)return;
+    if(t.effect.cultivateSpeed)G.cultivateSpeed+=t.effect.cultivateSpeed;
+    if(t.effect.atkBonus)G.atk=Math.floor(G.atk*(1+t.effect.atkBonus));
+    if(t.effect.allBonus){
+      G.atk=Math.floor(G.atk*(1+t.effect.allBonus));
+      G.def=Math.floor(G.def*(1+t.effect.allBonus));
+      G.maxHp=Math.floor(G.maxHp*(1+t.effect.allBonus));
+    }
+  });
+}
+
+// ==================== 战斗系统 ====================
+let battleState={active:false,enemy:null,enemyHp:0,enemyMaxHp:0,turn:0,log:[],auto:false};
+
+function startBattle(monsterId){
+  const m=MONSTERS[monsterId];
+  if(!m)return;
+  battleState={
+    active:true,
+    enemy:{...m},
+    enemyHp:m.hp,
+    enemyMaxHp:m.hp,
+    turn:0,
+    log:[],
+    auto:false
+  };
+  G.hp=G.maxHp;
+  $('battleScene').classList.add('show');
+  $('battleTitle').textContent=`⚔️ 战斗 · ${m.name}`;
+  $('enemyBattleIcon').textContent=m.icon;
+  $('enemyBattleName').textContent=m.name;
+  $('playerBattleIcon').textContent=HERO_PORTRAITS[G.realmIndex].icon;
+  $('playerBattleName').textContent=G.name;
+  updateBattleUI();
+  $('battleLog').innerHTML='<div class="log-info">战斗开始！</div>';
+}
+
+function updateBattleUI(){
+  const pHpPct=Math.max(0,G.hp/G.maxHp*100);
+  const eHpPct=Math.max(0,battleState.enemyHp/battleState.enemyMaxHp*100);
+  $('playerHpBar').style.width=pHpPct+'%';
+  $('enemyHpBar').style.width=eHpPct+'%';
+  $('playerHpText').textContent=`${Math.max(0,G.hp)}/${G.maxHp}`;
+  $('enemyHpText').textContent=`${Math.max(0,battleState.enemyHp)}/${battleState.enemyMaxHp}`;
+}
+
+function battleAction(action){
+  if(!battleState.active)return;
+  battleState.turn++;
+
+  if(action==='flee'){
+    if(Math.random()<0.5){
+      addBattleLog('逃跑成功！','info');
+      endBattle(false);
+    }else{
+      addBattleLog('逃跑失败！','info');
+      enemyTurn();
+    }
+    return;
+  }
+
+  if(action==='pill'){
+    const pillIdx=G.bag.findIndex(b=>b.id==='pill5');
+    if(pillIdx===-1){showToast('没有回血丹！','error');return}
+    G.bag[pillIdx].count--;
+    if(G.bag[pillIdx].count<=0)G.bag.splice(pillIdx,1);
+    const heal=Math.floor(G.maxHp*0.3);
+    G.hp=Math.min(G.maxHp,G.hp+heal);
+    addBattleLog(`服用回血丹，恢复${heal}生命`,'heal');
+    updateBattleUI();
+    enemyTurn();
+    return;
+  }
+
+  // 玩家攻击
+  let dmg=Math.max(1,G.atk-battleState.enemy.def*0.5);
+  let isCrit=Math.random()<0.15+G.luck*0.005;
+  if(isCrit)dmg=Math.floor(dmg*1.5);
+  dmg=Math.floor(dmg*(0.9+Math.random()*0.2));
+
+  if(action==='skill'){
+    dmg=Math.floor(dmg*1.8);
+    addBattleLog(`释放神通，对${battleState.enemy.name}造成 ${dmg} 伤害${isCrit?' (暴击！)':''}`,'crit');
+  }else{
+    addBattleLog(`攻击${battleState.enemy.name}，造成 ${dmg} 伤害${isCrit?' (暴击！)':''}`,isCrit?'crit':'damage');
+  }
+
+  battleState.enemyHp-=dmg;
+  updateBattleUI();
+
+  if(battleState.enemyHp<=0){
+    setTimeout(()=>endBattle(true),500);
+    return;
+  }
+
+  // 敌人回合
+  setTimeout(()=>enemyTurn(),600);
+}
+
+function enemyTurn(){
+  if(!battleState.active)return;
+  let dmg=Math.max(1,battleState.enemy.atk-G.def*0.5);
+  dmg=Math.floor(dmg*(0.9+Math.random()*0.2));
+  G.hp-=dmg;
+  addBattleLog(`${battleState.enemy.name}攻击你，造成 ${dmg} 伤害`,'damage');
+  updateBattleUI();
+
+  if(G.hp<=0){
+    setTimeout(()=>endBattle(false),500);
+  }
+}
+
+function addBattleLog(msg,type='info'){
+  const log=$('battleLog');
+  const cls={damage:'log-damage',heal:'log-heal',info:'log-info',crit:'log-crit'}[type]||'log-info';
+  log.innerHTML+=`<div class="${cls}">${msg}</div>`;
+  log.scrollTop=log.scrollHeight;
+}
+
+function endBattle(won){
+  battleState.active=false;
+  if(won){
+    const m=battleState.enemy;
+    const expGain=m.exp;
+    const lsGain=m.lingshi;
+    G.xiuwei+=expGain;
+    G.totalXiuwei+=expGain;
+    G.lingshi+=lsGain;
+    G.xianyuan+=Math.floor(lsGain*0.1);
+    G.totalKills++;
+    G.tasks.fight=Math.min(G.tasks.fight+1,99);
+    G.autoFightCount++;
+
+    addBattleLog(`🎉 击败${m.name}！获得 ${expGain}修为 ${lsGain}灵石`,'info');
+
+    // 掉落
+    m.drops.forEach(d=>{
+      if(Math.random()<d.rate){
+        addItem(d.id,1);
+        addBattleLog(`掉落：${ITEMS[d.id].icon}${ITEMS[d.id].name}`,'info');
+      }
+    });
+
+    setTimeout(()=>{
+      $('battleScene').classList.remove('show');
+      showToast(`击杀${m.name}！+${expGain}修为 +${lsGain}灵石`,'success');
+      updateUI();
+      saveGame();
+    },1000);
+  }else{
+    addBattleLog('💀 战斗失败...','damage');
+    setTimeout(()=>{
+      $('battleScene').classList.remove('show');
+      showToast('战斗失败，回去修炼吧！','error');
+      G.hp=Math.floor(G.maxHp*0.3);
+      updateUI();
+    },1000);
+  }
+}
+
+function skipBattle(){
+  if(!battleState.active)return;
+  // 快速结束
+  while(battleState.active&&battleState.enemyHp>0&&G.hp>0){
+    let dmg=Math.max(1,G.atk-battleState.enemy.def*0.5);
+    dmg=Math.floor(dmg*(0.9+Math.random()*0.2));
+    battleState.enemyHp-=dmg;
+    if(battleState.enemyHp<=0){endBattle(true);return}
+    let eDmg=Math.max(1,battleState.enemy.atk-G.def*0.5);
+    eDmg=Math.floor(eDmg*(0.9+Math.random()*0.2));
+    G.hp-=eDmg;
+    if(G.hp<=0){endBattle(false);return}
+  }
+}
+
+// ==================== 挂机系统 ====================
+let autoFightTimer=null;
+function toggleAutoFight(){
+  G.autoFight=!G.autoFight;
+  const btn=$('afBtn');
+  if(G.autoFight){
+    btn.textContent='停止挂机';
+    btn.classList.add('fighting');
+    doAutoFight();
+    autoFightTimer=setInterval(doAutoFight,2000);
+  }else{
+    btn.textContent='开始挂机';
+    btn.classList.remove('fighting');
+    clearInterval(autoFightTimer);
+  }
+}
+
+function doAutoFight(){
+  if(!G.autoFight)return;
+  const realm=SECRET_REALMS[G.currentRealm];
+  if(!realm)return;
+  const monsterIds=realm.monsters;
+  const mid=monsterIds[rand(0,monsterIds.length-1)];
+  const m=MONSTERS[mid];
+
+  // 自动战斗计算
+  const playerDps=G.atk*1.2;
+  const enemyDps=Math.max(0,m.atk-G.def*0.5);
+  const turnsToKill=Math.ceil(m.hp/playerDps);
+  const totalDmgTaken=enemyDps*turnsToKill;
+
+  if(totalDmgTaken<G.maxHp){
+    // 胜利
+    G.xiuwei+=m.exp;
+    G.totalXiuwei+=m.exp;
+    G.lingshi+=m.lingshi;
+    G.xianyuan+=Math.floor(m.lingshi*0.1);
+    G.totalKills++;
+    G.autoFightCount++;
+    m.drops.forEach(d=>{if(Math.random()<d.rate)addItem(d.id,1)});
+  }else{
+    G.autoFight=false;
+    $('afBtn').textContent='开始挂机';
+    $('afBtn').classList.remove('fighting');
+    clearInterval(autoFightTimer);
+    showToast('实力不足，挂机已停止！','error');
+  }
+  $('afInfo').innerHTML=`挂机中：击杀 <span style="color:var(--cyan)">${G.autoFightCount}</span> 只妖兽`;
+  updateUI();
+  saveGame();
+}
+
+// ==================== 背包系统 ====================
+function addItem(id,count=1){
+  const existing=G.bag.find(b=>b.id===id);
+  if(existing)existing.count+=count;
+  else G.bag.push({id,count});
+}
+
+function removeItem(id,count=1){
+  const idx=G.bag.findIndex(b=>b.id===id);
+  if(idx===-1)return false;
+  G.bag[idx].count-=count;
+  if(G.bag[idx].count<=0)G.bag.splice(idx,1);
+  return true;
+}
+
+function countItem(id){
+  const item=G.bag.find(b=>b.id===id);
+  return item?item.count:0;
+}
+
+let currentBagTab=0;
+function switchBagTab(tab){
+  currentBagTab=tab;
+  document.querySelectorAll('.bag-tab').forEach((t,i)=>t.classList.toggle('active',i===tab));
+  updateBagPage();
+}
+
+function updateBagPage(){
+  const grid=$('bagGrid');
+  let items=G.bag.slice();
+  if(currentBagTab===1)items=items.filter(b=>ITEMS[b.id]&&ITEMS[b.id].type==='equip');
+  else if(currentBagTab===2)items=items.filter(b=>ITEMS[b.id]&&ITEMS[b.id].type==='pill');
+  else if(currentBagTab===3)items=items.filter(b=>ITEMS[b.id]&&ITEMS[b.id].type==='material');
+  else if(currentBagTab===4)items=items.filter(b=>ITEMS[b.id]&&ITEMS[b.id].type==='technique');
+
+  let html='';
+  const maxSlots=40;
+  for(let i=0;i<maxSlots;i++){
+    if(i<items.length){
+      const b=items[i];
+      const it=ITEMS[b.id];
+      if(!it)continue;
+      const rarity=it.rarity||'white';
+      html+=`<div class="bag-slot rarity-${rarity}" onclick="showItemDetail('${b.id}')">
+        <div class="item-rarity"></div>
+        <span class="item-icon">${it.icon}</span>
+        <span class="item-name">${it.name}</span>
+        ${b.count>1?`<span class="item-count">×${b.count}</span>`:''}
+      </div>`;
+    }else{
+      html+=`<div class="bag-slot empty"></div>`;
+    }
+  }
+  grid.innerHTML=html;
+}
+
+function showItemDetail(id){
+  const it=ITEMS[id];
+  if(!it)return;
+  const rarity=it.rarity||'white';
+  let statsHtml='';
+  if(it.stats){
+    for(const k in it.stats){
+      const labels={atk:'攻击',def:'防御',hp:'生命',spd:'速度',luck:'气运',spirit:'神识'};
+      statsHtml+=`<div class="equip-stat-row"><span class="es-label">${labels[k]||k}</span><span class="es-val">+${it.stats[k]}</span></div>`;
+    }
+  }
+  if(it.effect){
+    for(const k in it.effect){
+      const labels={xiuwei:'修为',breakthrough:'突破加成',breakthroughRate:'突破成功率',heal:'生命恢复',cultivateSpeed:'修炼速度',atkBonus:'攻击加成',allBonus:'全属性加成'};
+      const val=it.effect[k];
+      statsHtml+=`<div class="equip-stat-row"><span class="es-label">${labels[k]||k}</span><span class="es-val" style="color:var(--cyan)">+${typeof val==='number'&&val<1?Math.round(val*100)+'%':val}</span></div>`;
+    }
+  }
+
+  let actionsHtml='';
+  if(it.type==='pill')actionsHtml+=`<button class="btn btn-primary" onclick="useItem('${id}');closeModal()">使用</button>`;
+  if(it.type==='equip')actionsHtml+=`<button class="btn btn-cyan" onclick="equipItem('${id}');closeModal()">装备</button>`;
+  if(it.type==='technique')actionsHtml+=`<button class="btn btn-primary" onclick="learnTechnique('${id}');closeModal()">修炼</button>`;
+  actionsHtml+=`<button class="btn btn-secondary" onclick="sellItem('${id}');closeModal()">出售(${Math.floor(it.price*0.3)}💎)</button>`;
+
+  const modal=$('modalContent');
+  modal.innerHTML=`<div class="modal-header"><h3 style="color:${rarityColor(rarity)}">${it.icon} ${it.name}</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+  <div class="modal-body">
+    <div class="equip-detail">
+      <div class="equip-header">
+        <div class="equip-icon-big" style="border-color:${rarityColor(rarity)}">${it.icon}</div>
+        <div class="equip-meta">
+          <div class="equip-name-big" style="color:${rarityColor(rarity)}">${it.name}</div>
+          <div class="equip-type">${{material:'材料',pill:'丹药',equip:'装备',technique:'功法'}[it.type]||''} · ${countItem(id)}个</div>
+          <div style="font-size:11px;color:var(--white3);margin-top:4px">${it.desc}</div>
+        </div>
+      </div>
+      ${statsHtml?`<div class="equip-stats">${statsHtml}</div>`:''}
+    </div>
+  </div>
+  <div class="modal-footer">${actionsHtml}</div>`;
+  $('modalOverlay').classList.add('show');
+}
+
+function useItem(id){
+  const it=ITEMS[id];
+  if(!it||it.type!=='pill')return;
+  if(!removeItem(id))return;
+  if(it.effect.xiuwei){G.xiuwei+=it.effect.xiuwei;G.totalXiuwei+=it.effect.xiuwei;floatText(`+${it.effect.xiuwei}修为`,'#4ecdc4')}
+  if(it.effect.breakthroughRate){G.breakthroughBonus+=it.effect.breakthroughRate;floatText(`突破率+${it.effect.breakthroughRate}%`,'#ffd700')}
+  if(it.effect.heal){const h=Math.floor(G.maxHp*it.effect.heal);G.hp=Math.min(G.maxHp,G.hp+h);floatText(`+${h}生命`,'#2ecc71')}
+  showToast(`使用了${it.name}`,'success');
+  updateUI();saveGame();
+}
+
+function equipItem(id){
+  const it=ITEMS[id];
+  if(!it||it.type!=='equip')return;
+  if(!removeItem(id))return;
+  // 卸下旧装备
+  if(G.equips[it.slot])addItem(G.equips[it.slot],1);
+  G.equips[it.slot]=id;
+  applyEquipStats();
+  applyTechniqueStats();
+  showToast(`装备了${it.name}`,'success');
+  updateUI();saveGame();
+}
+
+function learnTechnique(id){
+  if(G.techniques.includes(id)){showToast('已经学过此功法！','error');return}
+  if(!removeItem(id))return;
+  G.techniques.push(id);
+  applyTechniqueStats();
+  showToast(`学会了${ITEMS[id].name}！`,'gold');
+  updateUI();saveGame();
+}
+
+function sellItem(id){
+  const it=ITEMS[id];
+  if(!it||!removeItem(id))return;
+  G.lingshi+=Math.floor(it.price*0.3);
+  showToast(`出售${it.name}，获得${Math.floor(it.price*0.3)}灵石`,'success');
+  updateUI();saveGame();
+}
+
+function sortBag(){showToast('行囊已整理','success');updateBagPage()}
+function sellAll(){
+  let total=0;
+  G.bag=G.bag.filter(b=>{
+    const it=ITEMS[b.id];
+    if(!it)return false;
+    if(it.type==='material'){total+=Math.floor(it.price*0.3)*b.count;return false}
+    return true;
+  });
+  G.lingshi+=total;
+  showToast(`出售材料，获得${total}灵石`,'success');
+  updateUI();saveGame();
+}
+
+// ==================== 炼丹系统 ====================
+function doAlchemy(recipeId){
+  const recipe=RECIPES.find(r=>r.id===recipeId);
+  if(!recipe)return;
+  // 检查材料
+  for(const m of recipe.materials){
+    if(countItem(m.id)<m.count){showToast(`材料不足：${ITEMS[m.id].name}`,'error');return}
+  }
+  // 消耗材料
+  for(const m of recipe.materials)removeItem(m.id,m.count);
+  // 判断成功
+  if(Math.random()<recipe.successRate){
+    addItem(recipe.id,1);
+    showToast(`🎉 炼丹成功！获得${ITEMS[recipe.id].name}`,'gold');
+    G.tasks.alchemy=Math.min(G.tasks.alchemy+1,99);
+  }else{
+    showToast('炼丹失败，材料已消耗','error');
+  }
+  openModal('alchemyModal');
+  updateUI();saveGame();
+}
+
+// ==================== 炼器系统 ====================
+function doForge(equipId){
+  const costs={equip1:{mat1:5},equip2:{mat1:8,herb1:3}};
+  const cost=costs[equipId];
+  if(!cost){showToast('配方不存在','error');return}
+  for(const k in cost){
+    if(countItem(k)<cost[k]){showToast(`材料不足：${ITEMS[k].name}`,'error');return}
+  }
+  for(const k in cost)removeItem(k,cost[k]);
+  if(Math.random()<0.7){
+    addItem(equipId,1);
+    showToast(`🎉 打造成功！获得${ITEMS[equipId].name}`,'gold');
+  }else{
+    showToast('打造失败，材料已消耗','error');
+  }
+  updateUI();saveGame();
+}
+
+// ==================== 商店系统 ====================
+function buyItem(id){
+  const it=ITEMS[id];
+  if(!it)return;
+  if(G.lingshi<it.price){showToast('灵石不足！','error');return}
+  G.lingshi-=it.price;
+  addItem(id,1);
+  showToast(`购买${it.name}成功！`,'success');
+  openModal('shopModal');
+  updateUI();saveGame();
+}
+
+// ==================== 天机阁 ====================
+function divineExchange(id){
+  const costs={pill4:100,tech3:200,tech4:500};
+  const cost=costs[id];
+  if(!cost){return}
+  if(G.xianyuan<cost){showToast('仙缘不足！','error');return}
+  G.xianyuan-=cost;
+  addItem(id,1);
+  showToast(`兑换${ITEMS[id].name}成功！`,'gold');
+  openModal('divineModal');
+  updateUI();saveGame();
+}
+
+// ==================== 任务系统 ====================
+function claimTask(id,done){
+  if(!done)return;
+  const rewards={cultivate:50,fight:100,alchemy:80};
+  G.lingshi+=rewards[id]||0;
+  G.tasks[id]=0;
+  showToast(`领取任务奖励：${rewards[id]}灵石`,'gold');
+  openModal('taskModal');
+  updateUI();saveGame();
+}
+
+// ==================== 药圃系统 ====================
+function plantHerb(id){
+  const costs={herb1:10,herb2:30};
+  if(G.lingshi<(costs[id]||0)){showToast('灵石不足！','error');return}
+  G.lingshi-=costs[id]||0;
+  showToast('种植成功，30秒后可收获','success');
+  setTimeout(()=>{
+    addItem(id,rand(1,3));
+    showToast(`🌿 ${ITEMS[id].name}已成熟！`,'success');
+    updateUI();saveGame();
+  },30000);
+  updateUI();saveGame();
+}
+
+// ==================== 聚灵阵 ====================
+function upgradeArray(){
+  if(G.lingshi<500){showToast('灵石不足！','error');return}
+  G.lingshi-=500;
+  G.cultivateSpeed+=0.2;
+  showToast(`聚灵阵升级！修炼速度×${G.cultivateSpeed.toFixed(1)}`,'gold');
+  updateUI();saveGame();
+}
+
+// ==================== 剧情系统 ====================
+let currentStory=null;
+let currentSceneIdx=0;
+
+function startStoryChapter(chId){
+  closeModal();
+  const ch=STORY_CHAPTERS.find(c=>c.id===chId);
+  if(!ch)return;
+  currentStory=ch;
+  currentSceneIdx=G.storyProgress[chId]||0;
+  if(currentSceneIdx>=ch.scenes.length)currentSceneIdx=0;
+  showStoryScene();
+  $('storyScene').classList.add('show');
+}
+
+function showStoryScene(){
+  if(!currentStory)return;
+  const scene=currentStory.scenes[currentSceneIdx];
+  if(!scene)return;
+  $('storyBg').style.background=currentStory.bg||'linear-gradient(180deg,#1a0a2a,#0a1a3a)';
+  $('storySpeaker').textContent=scene.speaker?'【'+scene.speaker+'']':'';
+  $('storyText').textContent=scene.text;
+
+  const choicesEl=$('storyChoices');
+  choicesEl.innerHTML='';
+  if(scene.choices){
+    scene.choices.forEach(c=>{
+      const btn=document.createElement('div');
+      btn.className='story-choice';
+      btn.textContent=c.text;
+      btn.onclick=()=>makeStoryChoice(c);
+      choicesEl.appendChild(btn);
+    });
+  }
+
+  $('storyContinue').style.display=scene.choices?'none':'block';
+}
+
+function advanceStory(){
+  if(!currentStory)return;
+  currentSceneIdx++;
+  if(currentSceneIdx>=currentStory.scenes.length){
+    endStoryChapter();
+    return;
+  }
+  showStoryScene();
+}
+
+function makeStoryChoice(choice){
+  if(choice.reward){
+    if(choice.reward.xiuwei){G.xiuwei+=choice.reward.xiuwei;G.totalXiuwei+=choice.reward.xiuwei}
+    if(choice.reward.lingshi)G.lingshi+=choice.reward.lingshi;
+    if(choice.reward.title){
+      const realm=REALMS[G.realmIndex];
+      // 更新称号
+    }
+    if(choice.reward.item)addItem(choice.reward.item,1);
+  }
+  if(choice.next===-1){
+    endStoryChapter();
+    return;
+  }
+  currentSceneIdx=choice.next;
+  showStoryScene();
+}
+
+function endStoryChapter(){
+  if(currentStory){
+    G.storyProgress[currentStory.id]=currentStory.scenes.length;
+    // 最终场景奖励
+    const lastScene=currentStory.scenes[currentStory.scenes.length-1];
+    if(lastScene&&lastScene.reward){
+      const r=lastScene.reward;
+      if(r.xiuwei){G.xiuwei+=r.xiuwei;G.totalXiuwei+=r.xiuwei}
+      if(r.lingshi)G.lingshi+=r.lingshi;
+      if(r.item)addItem(r.item,1);
+    }
+  }
+  $('storyScene').classList.remove('show');
+  showToast('剧情完成！','gold');
+  updateUI();saveGame();
+}
+
+// ==================== 秘境系统 ====================
+function updateRealmPage(){
+  const list=$('realmList');
+  let html='';
+  SECRET_REALMS.forEach((r,i)=>{
+    const locked=G.realmIndex<r.minRealm;
+    const active=G.currentRealm===i;
+    html+=`<div class="recipe-item" onclick="${locked?'':`selectRealm(${i})`}" style="${locked?'opacity:.4':''};${active?'border-color:var(--cyan)':''}">
+      <span class="r-icon">${locked?'🔒':r.icon}</span>
+      <div class="r-info">
+        <div class="r-name">${r.name}</div>
+        <div class="r-desc">${locked?`需要${REALMS[r.minRealm].name}期`:`${r.desc} ${active?'(当前)':''}`}</div>
+      </div>
+      ${active?'<span style="color:var(--cyan)">●</span>':''}
+    </div>`;
+  });
+  list.innerHTML=html;
+  updateMonsterArea();
+}
+
+function selectRealm(idx){
+  G.currentRealm=idx;
+  updateRealmPage();
+}
+
+function updateMonsterArea(){
+  const realm=SECRET_REALMS[G.currentRealm];
+  if(!realm)return;
+  $('realmMapTitle').textContent=`${realm.icon} ${realm.name}`;
+  const area=$('monsterArea');
+  let html='';
+  realm.monsters.forEach(mid=>{
+    const m=MONSTERS[mid];
+    const isBoss=m.realm>=3;
+    html+=`<div class="monster-btn ${isBoss?'boss':''}" onclick="startBattle(${mid})">
+      <span class="m-icon">${m.icon}</span>
+      <span class="m-name">${m.name}</span>
+      <span class="m-level">${isBoss?'BOSS':'Lv.'+m.realm}</span>
+    </div>`;
+  });
+  area.innerHTML=html;
+}
+
+// ==================== UI更新 ====================
+function updateUI(){
+  const realm=REALMS[G.realmIndex];
+  const stageName=realm.stages[G.stageIndex];
+  const neededXiuwei=realm.xiuwei[G.stageIndex];
+  const pct=Math.min(100,G.xiuwei/neededXiuwei*100);
+
+  // 顶部
+  $('playerName').textContent=G.name;
+  $('realmBadge').textContent=realm.name+stageName.substring(0,2);
+  $('realmText').textContent=`${realm.name}期 · ${stageName}`;
+  $('resLingshi').textContent=formatNum(G.lingshi);
+  $('resXianyuan').textContent=formatNum(G.xianyuan);
+  $('resXiuwei').textContent=`${formatNum(G.xiuwei)}/${formatNum(neededXiuwei)}`;
+  $('xiuweiBar').style.width=pct+'%';
+  $('xiuweiText').textContent=`修为 ${formatNum(G.xiuwei)}/${formatNum(neededXiuwei)}`;
+
+  // 修炼页
+  $('heroName').textContent=G.name;
+  $('heroRealm').textContent=`${realm.name}期 · ${stageName}`;
+  $('heroPortrait').textContent=HERO_PORTRAITS[G.realmIndex].icon;
+  $('heroPortrait').parentElement.style.cssText=HERO_PORTRAITS[G.realmIndex].style;
+  $('avatarDisplay').textContent=HERO_PORTRAITS[G.realmIndex].icon;
+  $('realmGlow').style.boxShadow=`0 0 15px ${realm.color}`;
+  $('statAtk').textContent=G.atk;
+  $('statDef').textContent=G.def;
+  $('statHp').textContent=G.maxHp;
+  $('statSpd').textContent=G.spd;
+  $('statLuck').textContent=G.luck;
+  $('statSpirit').textContent=G.spirit;
+
+  // 突破按钮
+  const canBT=G.xiuwei>=neededXiuwei;
+  $('btDesc').textContent=canBT?`修为已满，可以突破！(${Math.round(60+G.luck+G.breakthroughBonus)}%)`:`修为不足，还需${formatNum(neededXiuwei-G.xiuwei)}`;
+
+  // 境界蜕变
+  updateEvolveStage();
+
+  // 功法列表
+  updateTechniqueList();
+
+  // 洞府
+  $('caveQi').textContent=`Lv.${Math.floor(G.cultivateSpeed*5)} · 灵气${G.cultivateSpeed>=2?'充沛':G.cultivateSpeed>=1.5?'尚可':'稀薄'}`;
+
+  // 任务badge
+  const taskDone=(G.tasks.cultivate>=3?1:0)+(G.tasks.fight>=5?1:0)+(G.tasks.alchemy>=2?1:0);
+  $('taskBadge').textContent=3-taskDone;
+  $('taskBadge').style.display=taskDone>=3?'none':'block';
+}
+
+function updateEvolveStage(){
+  const stage=$('evolveStage');
+  let html='';
+  const showCount=Math.min(6,REALMS.length);
+  const startIdx=Math.max(0,G.realmIndex-2);
+  for(let i=startIdx;i<startIdx+showCount&&i<REALMS.length;i++){
+    const active=i<G.realmIndex||(i===G.realmIndex&&G.stageIndex>=REALMS[i].stages.length-1);
+    const current=i===G.realmIndex;
+    html+=`<div class="evolve-dot ${active?'active':''} ${current?'current':''}" title="${REALMS[i].name}"></div>`;
+    if(i<startIdx+showCount-1&&i<REALMS.length-1)html+=`<div class="evolve-line"></div>`;
+  }
+  stage.innerHTML=html;
+  $('evolveLabel').textContent=`当前：${REALMS[G.realmIndex].name}期 · ${REALMS[G.realmIndex].stages[G.stageIndex]}`;
+}
+
+function updateTechniqueList(){
+  const list=$('techniqueList');
+  let html='';
+  G.techniques.forEach(tid=>{
+    const t=ITEMS[tid];
+    if(!t)return;
+    html+=`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:24px">${t.icon}</span>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;color:${rarityColor(t.rarity||'white')}">${t.name}</div>
+        <div style="font-size:10px;color:var(--white3);margin-top:2px">${t.desc}</div>
+      </div>
+      <span style="font-size:10px;color:var(--green)">已修炼</span>
+    </div>`;
+  });
+  list.innerHTML=html;
+}
+
+function showPlayerDetail(){
+  const realm=REALMS[G.realmIndex];
+  const modal=$('modalContent');
+  modal.innerHTML=`<div class="modal-header"><h3>👤 角色信息</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+  <div class="modal-body">
+    <div style="text-align:center;margin-bottom:12px">
+      <div style="font-size:50px">${HERO_PORTRAITS[G.realmIndex].icon}</div>
+      <div style="font-size:18px;font-weight:700;color:var(--gold2);margin-top:8px">${G.name}</div>
+      <div style="font-size:13px;color:${realm.color};margin-top:4px">${realm.name}期 · ${realm.stages[G.stageIndex]}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="stat-box"><div class="stat-label">⚔️ 攻击</div><div class="stat-val">${G.atk}</div></div>
+      <div class="stat-box"><div class="stat-label">🛡️ 防御</div><div class="stat-val">${G.def}</div></div>
+      <div class="stat-box"><div class="stat-label">❤️ 生命</div><div class="stat-val">${G.maxHp}</div></div>
+      <div class="stat-box"><div class="stat-label">💨 速度</div><div class="stat-val">${G.spd}</div></div>
+      <div class="stat-box"><div class="stat-label">🍀 气运</div><div class="stat-val">${G.luck}</div></div>
+      <div class="stat-box"><div class="stat-label">✨ 神识</div><div class="stat-val">${G.spirit}</div></div>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:var(--white3);line-height:2">
+      <div>📊 总修为：${formatNum(G.totalXiuwei)}</div>
+      <div>💰 灵石：${formatNum(G.lingshi)}</div>
+      <div>🪙 仙缘：${formatNum(G.xianyuan)}</div>
+      <div>⚔️ 总击杀：${G.totalKills}</div>
+      <div>📖 功法：${G.techniques.length}门</div>
+      <div>🌿 修炼速度：×${G.cultivateSpeed.toFixed(1)}</div>
+    </div>
+  </div>`;
+  $('modalOverlay').classList.add('show');
+}
+
+// ==================== 离线系统 ====================
+function calcOffline(){
+  const now=Date.now();
+  const elapsed=(now-G.lastOnline)/1000/60; // 分钟
+  if(elapsed<1)return;
+  const xiuweiGain=Math.floor(elapsed*5*G.cultivateSpeed);
+  const lingshiGain=Math.floor(elapsed*2*G.cultivateSpeed);
+  G.offlineXiuwei=xiuweiGain;
+  G.offlineLingshi=lingshiGain;
+  $('offlineTime').textContent=elapsed>=60?`${(elapsed/60).toFixed(1)}小时`:`${Math.floor(elapsed)}分钟`;
+  $('offlineXiuwei').textContent=`+${formatNum(xiuweiGain)}`;
+  $('offlineLingshi').textContent=`+${formatNum(lingshiGain)}`;
+}
+
+function collectOffline(){
+  if(G.offlineXiuwei>0||G.offlineLingshi>0){
+    G.xiuwei+=G.offlineXiuwei;
+    G.totalXiuwei+=G.offlineXiuwei;
+    G.lingshi+=G.offlineLingshi;
+    showToast(`领取离线收益：${formatNum(G.offlineXiuwei)}修为 ${formatNum(G.offlineLingshi)}灵石`,'gold');
+    G.offlineXiuwei=0;
+    G.offlineLingshi=0;
+    G.lastOnline=Date.now();
+    updateUI();saveGame();
+  }else{
+    showToast('暂无离线收益','error');
+  }
+}
+
+// ==================== 存档系统 ====================
+function saveGame(){
+  try{
+    G.lastOnline=Date.now();
+    localStorage.setItem('xiuxian_save',JSON.stringify(G));
+  }catch(e){}
+}
+
+function loadGame(){
+  try{
+    const data=localStorage.getItem('xiuxian_save');
+    if(data){
+      const saved=JSON.parse(data);
+      Object.assign(G,saved);
+      levelUpStats();
+      calcOffline();
+    }
+  }catch(e){}
+}
+
+// ==================== 粒子效果 ====================
+function initParticles(){
+  const container=$('particles');
+  for(let i=0;i<15;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    p.style.left=rand(5,95)+'%';
+    p.style.top=rand(20,80)+'%';
+    p.style.animationDelay=rand(0,4)+'s';
+    p.style.animationDuration=rand(3,6)+'s';
+    p.style.width=rand(2,4)+'px';
+    p.style.height=p.style.width;
+    container.appendChild(p);
+  }
+}
+
+// ==================== 初始化 ====================
+function init(){
+  loadGame();
+  initParticles();
+  updateUI();
+  updateRealmPage();
+  updateBagPage();
+
+  // 自动保存
+  setInterval(saveGame,30000);
+
+  // 修炼页初始化
+  updateCultivatePage();
+}
+
+function updateCultivatePage(){
+  // 已在updateUI中处理
+}
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded',init);
+
+// 防止iOS弹性滚动
+document.addEventListener('touchmove',function(e){
+  if(e.target.closest('.page,.modal,.battle-scene,.story-scene'))return;
+  e.preventDefault();
+},{passive:false});
+</script>
+</body>
+</html>
